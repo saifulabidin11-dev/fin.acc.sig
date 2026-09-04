@@ -62,12 +62,12 @@ main{padding:22px 30px 48px;max-width:1900px;margin:0 auto}
 .matrix{display:flex;flex-direction:column;gap:16px;min-width:0}
 .classcard{background:linear-gradient(180deg,#fdfefe 0%,#f5f8fb 100%);border:1px solid #d5e0e8;border-radius:24px;overflow:hidden;box-shadow:0 14px 34px rgba(24,49,73,.09), inset 0 1px 0 rgba(255,255,255,.75);transition:.18s ease;position:relative}.classcard:hover{box-shadow:0 18px 40px rgba(24,49,73,.12), inset 0 1px 0 rgba(255,255,255,.78);transform:translateY(-2px)}
 .classhead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid #d7e1e9;position:relative}
-.classcard:nth-of-type(1) .classhead{background:linear-gradient(180deg,#eef5fc 0%,#e6f0fb 100%);border-left:8px solid var(--class1-line)}
-.classcard:nth-of-type(2) .classhead{background:linear-gradient(180deg,#eef9f4 0%,#e5f4ed 100%);border-left:8px solid var(--class2-line)}
-.classcard:nth-of-type(3) .classhead{background:linear-gradient(180deg,#fff7ea 0%,#fdf0d7 100%);border-left:8px solid var(--class3-line)}
-.classcard:nth-of-type(4) .classhead{background:linear-gradient(180deg,#f4effd 0%,#ece4fb 100%);border-left:8px solid var(--class4-line)}
-.classname{font-size:12px;font-weight:900;color:#1d4361;letter-spacing:-.01em;text-transform:uppercase}
-.classmeta{font-size:8px;color:#6b8094;background:rgba(255,255,255,.78);padding:6px 10px;border-radius:999px;border:1px solid rgba(112,134,154,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+.classcard:nth-of-type(1) .classhead{background:linear-gradient(180deg,#1f6fb2 0%,#185c96 100%);border-left:8px solid #0f4778;color:#fff}
+.classcard:nth-of-type(2) .classhead{background:linear-gradient(180deg,#178567 0%,#116a52 100%);border-left:8px solid #0b4e3d;color:#fff}
+.classcard:nth-of-type(3) .classhead{background:linear-gradient(180deg,#c9861e 0%,#a96b10 100%);border-left:8px solid #7f4e08;color:#fff}
+.classcard:nth-of-type(4) .classhead{background:linear-gradient(180deg,#6f4bbd 0%,#58369d 100%);border-left:8px solid #44257f;color:#fff}
+.classname{font-size:12px;font-weight:900;color:inherit;letter-spacing:-.01em;text-transform:uppercase}
+.classmeta{font-size:8px;color:#ffffff;background:rgba(255,255,255,.14);padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.24);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
 .activities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(229,236,243,.16) 100%)}
 .activity{padding:18px 18px 17px;border-right:1px solid #dde6ed;min-height:226px;cursor:pointer;position:relative;transition:.18s ease;backdrop-filter:blur(3px)}
 .activity:last-child{border-right:0}
@@ -114,6 +114,12 @@ main{padding:22px 30px 48px;max-width:1900px;margin:0 auto}
 }
 .tabbtn:hover{background:#f6f8fb;transform:translateY(-1px)}
 .tabbtn.active{background:#245d87;color:white;border-color:#245d87;box-shadow:0 6px 14px rgba(36,93,135,.18)}
+
+.class-tabs .tabbtn:nth-child(1).active{background:#1f6fb2;border-color:#1f6fb2}
+.class-tabs .tabbtn:nth-child(2).active{background:#178567;border-color:#178567}
+.class-tabs .tabbtn:nth-child(3).active{background:#c9861e;border-color:#c9861e}
+.class-tabs .tabbtn:nth-child(4).active{background:#6f4bbd;border-color:#6f4bbd}
+
 .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:13px}
 .kpi{border:1px solid var(--line);border-radius:16px;padding:13px 15px;box-shadow:0 7px 18px rgba(32,58,82,.06);position:relative;overflow:hidden}.kpi::after{content:"";position:absolute;left:0;right:0;top:0;height:4px}
 .summary .kpi:nth-child(1){background:linear-gradient(180deg,#edf6fd 0%,var(--kpi1) 100%);border-color:#c8dff2}
@@ -211,11 +217,15 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
   transform:translateX(2px)
 }
 .sidebar-item.active{
-  background:#ffffff;
-  color:#173b59;
-  border-color:#ffffff;
-  box-shadow:0 7px 18px rgba(10,31,49,.20)
+  color:#ffffff;
+  border-color:rgba(255,255,255,.28);
+  box-shadow:0 8px 20px rgba(10,31,49,.24)
 }
+.sidebar-item:nth-child(1).active{background:linear-gradient(180deg,#2f80c5 0%,#1f659f 100%)}
+.sidebar-item:nth-child(2).active{background:linear-gradient(180deg,#1c9271 0%,#14745a 100%)}
+.sidebar-item:nth-child(3).active{background:linear-gradient(180deg,#d1922d 0%,#b47617 100%)}
+.sidebar-item:nth-child(4).active{background:linear-gradient(180deg,#7a58c8 0%,#6142a9 100%)}
+
 .sidebar-dot{
   width:8px;height:8px;border-radius:999px;background:#7ba6c9
 }
@@ -236,8 +246,8 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
   padding:3px 6px
 }
 .sidebar-item.active .sidebar-count{
-  color:#607b90;
-  background:#eef4f8
+  color:#ffffff;
+  background:rgba(255,255,255,.16)
 }
 .dashboard-content{min-width:0}
 .dashboard-selected-head{
@@ -253,6 +263,12 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
   font-weight:900;
   color:#1c4564
 }
+
+.dashboard-selected-title.class-1{color:#185c96}
+.dashboard-selected-title.class-2{color:#116a52}
+.dashboard-selected-title.class-3{color:#a96b10}
+.dashboard-selected-title.class-4{color:#58369d}
+
 .dashboard-selected-meta{
   font-size:8px;
   color:#8294a4
@@ -347,7 +363,7 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
     <div class="tablecard">
       <div class="tablehead">
         <div>
-          <div class="tabletitle" title="Conditional formatting final: warna hanya untuk kolom %. Nilai % positif merah, nilai % negatif hijau, nilai 0 netral. Amount tetap hitam.">Detail Account-Description</div>
+          <div class="tabletitle" title="Conditional formatting final: warna hanya untuk %. BEBAN BUNGA: + merah, - hijau. Pendapatan Lain-lain, Pendapatan Bunga, dan Laba (Rugi) Selisih Kurs: + hijau, - merah. Amount tetap hitam.">Detail Account-Description</div>
           
         </div>
         <input id="searchInput" class="search" placeholder="Cari Account / Description...">
@@ -428,7 +444,7 @@ const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_XML_BYTES = 120 * 1024 * 1024;
 const CACHE_DB = "fluctuation-dashboard";
 const CACHE_STORE = "state";
-const CACHE_KEY = "lastParsedDashboardV17";
+const CACHE_KEY = "lastParsedDashboardV19";
 
 let state = null;
 let activeClass = CLASSIFICATIONS[0];
@@ -534,9 +550,25 @@ function fmtPct(n){
   return new Intl.NumberFormat("id-ID",{minimumFractionDigits:1,maximumFractionDigits:1}).format(n*100)+"%";
 }
 
-function percentColorClass(n){
+function percentColorClass(classification, n){
   if(n === null || n === undefined || !Number.isFinite(n) || n === 0) return "neutral";
-  return n > 0 ? "negative" : "positive";
+
+  // Final conditional formatting for percentage only:
+  //
+  // BEBAN BUNGA
+  //   + = naik  = merah
+  //   - = turun = hijau
+  //
+  // PENDAPATAN LAIN-LAIN
+  // PENDAPATAN BUNGA
+  // LABA (RUGI) SELISIH KURS
+  //   + = naik  = hijau
+  //   - = turun = merah
+  if(classification === "BEBAN BUNGA"){
+    return n > 0 ? "negative" : "positive";
+  }
+
+  return n > 0 ? "positive" : "negative";
 }
 
 function colLetters(ref){
@@ -951,7 +983,7 @@ function activityCard(c,key){
     <div class="metricrow">
       <div>
         <div class="label">${cfg.percentLabel}</div>
-        <div class="pct ${percentColorClass(a.percent)}">${fmtPct(a.percent)}</div>
+        <div class="pct ${percentColorClass(c.name,a.percent)}">${fmtPct(a.percent)}</div>
       </div>
       <div>
         <div class="label" style="text-align:right">${cfg.movementLabel}</div>
@@ -1005,6 +1037,8 @@ function renderDashboard(){
   });
 
   $("dashboardSelectedTitle").textContent=selected.name;
+  const selectedIndex = Math.max(0, state.classes.findIndex(c=>c.name===selected.name));
+  $("dashboardSelectedTitle").className=`dashboard-selected-title class-${selectedIndex+1}`;
   $("dashboardSelectedMeta").textContent=`${selected.activities.mom.rows.length} Account-Description`;
 
   $("matrix").innerHTML=`
@@ -1070,7 +1104,7 @@ function renderDetail(){
     <div class="kpi"><span>${cfg.currentLabel}</span><strong>${fmtFullAmount(total.current)}</strong></div>
     <div class="kpi"><span>${cfg.previousLabel}</span><strong>${fmtFullAmount(total.previous)}</strong></div>
     <div class="kpi"><span>${cfg.movementLabel}</span><strong >${total.movement>0?"+":""}${fmtFullAmount(total.movement)}</strong></div>
-    <div class="kpi"><span>${cfg.percentLabel}</span><strong class="${percentColorClass(total.percent)}">${fmtPct(total.percent)}</strong></div>`;
+    <div class="kpi"><span>${cfg.percentLabel}</span><strong class="${percentColorClass(c.name,total.percent)}">${fmtPct(total.percent)}</strong></div>`;
 
   $("detailThead").innerHTML=`<tr>
     <th>Account</th><th>Description</th><th>${cfg.previousLabel}</th><th>${cfg.currentLabel}</th>
@@ -1094,7 +1128,7 @@ function renderDetailRows(){
     <td>${fmtFullAmount(r.previous)}</td>
     <td>${fmtFullAmount(r.current)}</td>
     <td >${r.movement>0?"+":""}${fmtFullAmount(r.movement)}</td>
-    <td class="${percentColorClass(r.percent)}">${fmtPct(r.percent)}</td>
+    <td class="${percentColorClass(activeClass,r.percent)}">${fmtPct(r.percent)}</td>
   </tr>`).join("");
 
   // TOTAL always refers to ALL Detail Account-Description rows,
@@ -1109,7 +1143,7 @@ function renderDetailRows(){
     <td>${fmtFullAmount(totalPrevious)}</td>
     <td>${fmtFullAmount(totalCurrent)}</td>
     <td >${totalMovement>0?"+":""}${fmtFullAmount(totalMovement)}</td>
-    <td class="${percentColorClass(totalPercent)}">${fmtPct(totalPercent)}</td>
+    <td class="${percentColorClass(activeClass,totalPercent)}">${fmtPct(totalPercent)}</td>
   </tr>`;
   $("detailTbody").innerHTML=rowHtml+totalHtml;
 
