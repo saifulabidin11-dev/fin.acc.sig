@@ -42,7 +42,7 @@ h1{font-size:26px;margin:6px 0 0;font-weight:850;letter-spacing:-.02em}
 .filelabel:hover,.ghostbtn:hover{background:rgba(255,255,255,.15);transform:translateY(-1px)}
 #fileInput{display:none}
 .filesmall{font-size:8px;color:#bcd0df;max-width:320px;text-align:right}
-main{padding:20px 30px 46px;max-width:1900px;margin:0 auto}
+main{padding:22px 30px 48px;max-width:1900px;margin:0 auto}
 .status{
   display:none;margin-bottom:13px;border-radius:10px;padding:10px 12px;font-size:9px;line-height:1.45
 }
@@ -59,43 +59,43 @@ main{padding:20px 30px 46px;max-width:1900px;margin:0 auto}
 .empty-state h2{font-size:17px;margin:0 0 7px;color:#23435f}
 .empty-state p{font-size:10px;line-height:1.55;color:#76899a;margin:0 auto 16px;max-width:560px}
 .empty-action{display:inline-block;background:#315675;color:white;border-radius:10px;padding:9px 14px;font-size:9px;font-weight:850;cursor:pointer;box-shadow:0 7px 16px rgba(49,86,117,.16);transition:.18s ease}.empty-action:hover{transform:translateY(-1px)}
-.matrix{display:flex;flex-direction:column;gap:13px}
-.classcard{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);transition:.18s ease}.classcard:hover{box-shadow:var(--shadow-hover);transform:translateY(-1px)}
-.classhead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
-.classcard:nth-of-type(1) .classhead{background:var(--class1);border-left:7px solid var(--class1-line)}
-.classcard:nth-of-type(2) .classhead{background:var(--class2);border-left:7px solid var(--class2-line)}
-.classcard:nth-of-type(3) .classhead{background:var(--class3);border-left:7px solid var(--class3-line)}
-.classcard:nth-of-type(4) .classhead{background:var(--class4);border-left:7px solid var(--class4-line)}
-.classname{font-size:12px;font-weight:850;color:#243f55;letter-spacing:-.005em}
-.classmeta{font-size:8px;color:#8897a6;background:rgba(255,255,255,.58);padding:4px 7px;border-radius:8px;border:1px solid rgba(90,111,130,.08)}
-.activities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
-.activity{padding:16px 16px 15px;border-right:1px solid var(--line);min-height:226px;cursor:pointer;position:relative;transition:.18s ease}
+.matrix{display:flex;flex-direction:column;gap:16px}
+.classcard{background:linear-gradient(180deg,#fdfefe 0%,#f5f8fb 100%);border:1px solid #d5e0e8;border-radius:24px;overflow:hidden;box-shadow:0 14px 34px rgba(24,49,73,.09), inset 0 1px 0 rgba(255,255,255,.75);transition:.18s ease;position:relative}.classcard:hover{box-shadow:0 18px 40px rgba(24,49,73,.12), inset 0 1px 0 rgba(255,255,255,.78);transform:translateY(-2px)}
+.classhead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid #d7e1e9;position:relative}
+.classcard:nth-of-type(1) .classhead{background:linear-gradient(180deg,#eef5fc 0%,#e6f0fb 100%);border-left:8px solid var(--class1-line)}
+.classcard:nth-of-type(2) .classhead{background:linear-gradient(180deg,#eef9f4 0%,#e5f4ed 100%);border-left:8px solid var(--class2-line)}
+.classcard:nth-of-type(3) .classhead{background:linear-gradient(180deg,#fff7ea 0%,#fdf0d7 100%);border-left:8px solid var(--class3-line)}
+.classcard:nth-of-type(4) .classhead{background:linear-gradient(180deg,#f4effd 0%,#ece4fb 100%);border-left:8px solid var(--class4-line)}
+.classname{font-size:12px;font-weight:900;color:#1d4361;letter-spacing:-.01em;text-transform:uppercase}
+.classmeta{font-size:8px;color:#6b8094;background:rgba(255,255,255,.78);padding:6px 10px;border-radius:999px;border:1px solid rgba(112,134,154,.16);box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+.activities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:linear-gradient(180deg,rgba(255,255,255,.18) 0%,rgba(229,236,243,.16) 100%)}
+.activity{padding:18px 18px 17px;border-right:1px solid #dde6ed;min-height:226px;cursor:pointer;position:relative;transition:.18s ease;backdrop-filter:blur(3px)}
 .activity:last-child{border-right:0}
-.activity[data-activity="mom"]{background:linear-gradient(180deg,var(--mom-bg) 0%, #ffffff 60%)}
-.activity[data-activity="yoy"]{background:linear-gradient(180deg,var(--yoy-bg) 0%, #ffffff 60%)}
-.activity[data-activity="ytd"]{background:linear-gradient(180deg,var(--ytd-bg) 0%, #ffffff 60%)}
-.activity[data-activity="mom"]::before,.activity[data-activity="yoy"]::before,.activity[data-activity="ytd"]::before{content:"";position:absolute;left:0;right:0;top:0;height:5px}
+.activity[data-activity="mom"]{background:linear-gradient(180deg,#f2f8ff 0%,#f9fcff 24%,#f7fbfe 100%)}
+.activity[data-activity="yoy"]{background:linear-gradient(180deg,#f2fbf7 0%,#f9fcfb 24%,#f7fbfa 100%)}
+.activity[data-activity="ytd"]{background:linear-gradient(180deg,#f7f4ff 0%,#fbfaff 24%,#f9f8fe 100%)}
+.activity[data-activity="mom"]::before,.activity[data-activity="yoy"]::before,.activity[data-activity="ytd"]::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;box-shadow:0 1px 0 rgba(255,255,255,.4)}
 .activity[data-activity="mom"]::before{background:var(--mom-accent)}
 .activity[data-activity="yoy"]::before{background:var(--yoy-accent)}
 .activity[data-activity="ytd"]::before{background:var(--ytd-accent)}
-.activity:hover{filter:brightness(.998);transform:translateY(-1px)}
+.activity:hover{filter:brightness(.998);transform:translateY(-1px);box-shadow:inset 0 0 0 999px rgba(255,255,255,.06)}
 .acthead{display:flex;justify-content:space-between;align-items:center}
 .acttitle{font-size:11px;font-weight:900;color:#27485f;letter-spacing:.01em}
-.rekaptag{font-size:8px;color:#6f7f8f;background:rgba(255,255,255,.75);padding:4px 7px;border-radius:8px;border:1px solid rgba(108,135,162,.10)}
+.rekaptag{font-size:8px;color:#60758a;background:rgba(255,255,255,.82);padding:5px 9px;border-radius:999px;border:1px solid rgba(108,135,162,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
 .metricrow{display:grid;grid-template-columns:1fr .9fr;gap:12px;align-items:end;margin-top:11px}
 .label{font-size:8px;text-transform:uppercase;color:#8292a1;font-weight:800}
 .pct{font-size:30px;font-weight:900;letter-spacing:-.04em;margin-top:4px}
 .movement{font-size:16px;font-weight:850;text-align:right;margin-top:6px}
 .context{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
-.context div{background:rgba(255,255,255,.74);border-radius:11px;padding:9px;border:1px solid rgba(126,144,164,.10);box-shadow:inset 0 1px 0 rgba(255,255,255,.72)}
+.context div{background:linear-gradient(180deg,rgba(255,255,255,.92) 0%,rgba(247,250,252,.95) 100%);border-radius:13px;padding:10px;border:1px solid rgba(126,144,164,.16);box-shadow:0 4px 10px rgba(29,57,83,.04), inset 0 1px 0 rgba(255,255,255,.9)}
 .context span{display:block;font-size:7px;text-transform:uppercase;color:#8192a2;font-weight:800}
 .context b{display:block;font-size:10px;margin-top:4px}
-.keyreason{margin-top:11px;padding-top:10px;border-top:1px solid rgba(183,154,103,.22)}
+.keyreason{margin-top:12px;padding-top:12px;border-top:1px solid rgba(161,180,198,.36)}
 .keyreasonhead{display:flex;justify-content:space-between;gap:10px;font-size:8px;color:#748596}
 .driver{margin-top:6px}
 .driveracct{font-size:9px;font-weight:850;color:#2c4b62}
 .driverdesc{font-size:8px;color:#617588;margin-top:2px}
-.driverreason{font-size:8px;color:#465b6f;line-height:1.4;margin-top:4px;white-space:pre-wrap}
+.driverreason{font-size:8px;color:#42596e;line-height:1.45;margin-top:5px;white-space:pre-wrap;background:rgba(255,255,255,.48);border:1px solid rgba(183,197,210,.18);border-radius:10px;padding:8px 9px}
 .driverextra{font-size:8px;color:#8191a0;margin-top:5px}
 .positive{color:var(--green)!important;font-weight:850}.negative{color:var(--red)!important;font-weight:850}.neutral{color:#8f9da9!important}
 .hidden{display:none!important}
@@ -306,7 +306,7 @@ const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_XML_BYTES = 120 * 1024 * 1024;
 const CACHE_DB = "fluctuation-dashboard";
 const CACHE_STORE = "state";
-const CACHE_KEY = "lastParsedDashboardV13";
+const CACHE_KEY = "lastParsedDashboardV14";
 
 let state = null;
 let activeClass = CLASSIFICATIONS[0];
