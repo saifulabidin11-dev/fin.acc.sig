@@ -85,7 +85,7 @@ main{padding:22px 30px 48px;max-width:1900px;margin:0 auto}
 .metricrow{display:grid;grid-template-columns:1fr .9fr;gap:12px;align-items:end;margin-top:11px}
 .label{font-size:8px;text-transform:uppercase;color:#8292a1;font-weight:800}
 .pct{font-size:30px;font-weight:900;letter-spacing:-.04em;margin-top:4px}
-.movement{font-size:16px;font-weight:850;text-align:right;margin-top:6px}
+.movement{font-size:16px;font-weight:850;text-align:right;margin-top:6px;color:#17324a}
 .context{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
 .context div{background:linear-gradient(180deg,rgba(255,255,255,.92) 0%,rgba(247,250,252,.95) 100%);border-radius:13px;padding:10px;border:1px solid rgba(126,144,164,.16);box-shadow:0 4px 10px rgba(29,57,83,.04), inset 0 1px 0 rgba(255,255,255,.9)}
 .context span{display:block;font-size:7px;text-transform:uppercase;color:#8192a2;font-weight:800}
@@ -143,9 +143,9 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
 .pareto-badge{display:inline-block;margin-left:5px;padding:2px 6px;border-radius:9px;background:#fff3da;color:#8c6118;font-size:7px;font-weight:900;vertical-align:middle;border:1px solid #e5c77b}
 .tablefooter{padding:10px 15px;background:#fbfcfd;border-top:1px solid var(--line);font-size:8px;color:#7e8e9d}
 .reason-section{margin-top:14px}
-.reason-head{padding:15px 16px;border-bottom:1px solid #c8d5df;background:linear-gradient(180deg,#dfeaf3 0%,#d5e3ee 100%)}
-.reason-title{font-size:14px;font-weight:900;color:#173f5e}
-.reason-sub{font-size:9px;color:#59758d;margin-top:3px}
+.reason-head{padding:15px 16px;border-bottom:1px solid #12334d;background:linear-gradient(180deg,#173b59 0%,#12334d 100%)}
+.reason-title{font-size:14px;font-weight:900;color:#ffffff}
+.reason-sub{font-size:9px;color:#c8d8e5;margin-top:3px}
 .reason-list{display:flex;flex-direction:column}
 .reason-card{display:grid;grid-template-columns:220px 1fr;border-bottom:1px solid var(--line)}
 .reason-card:last-child{border-bottom:0}
@@ -347,7 +347,7 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
     <div class="tablecard">
       <div class="tablehead">
         <div>
-          <div class="tabletitle" title="Conditional formatting: nilai positif merah, nilai negatif hijau sesuai interpretasi finansial klasifikasi.">Detail Account-Description</div>
+          <div class="tabletitle" title="Conditional formatting final: warna hanya untuk kolom %. Nilai % positif merah, nilai % negatif hijau, nilai 0 netral. Amount tetap hitam.">Detail Account-Description</div>
           
         </div>
         <input id="searchInput" class="search" placeholder="Cari Account / Description...">
@@ -428,7 +428,7 @@ const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_XML_BYTES = 120 * 1024 * 1024;
 const CACHE_DB = "fluctuation-dashboard";
 const CACHE_STORE = "state";
-const CACHE_KEY = "lastParsedDashboardV15";
+const CACHE_KEY = "lastParsedDashboardV17";
 
 let state = null;
 let activeClass = CLASSIFICATIONS[0];
@@ -534,29 +534,9 @@ function fmtPct(n){
   return new Intl.NumberFormat("id-ID",{minimumFractionDigits:1,maximumFractionDigits:1}).format(n*100)+"%";
 }
 
-function financialColorClass(classification, n){
+function percentColorClass(n){
   if(n === null || n === undefined || !Number.isFinite(n) || n === 0) return "neutral";
-
-  // Final financial conditional-format rule:
-  // BEBAN BUNGA:
-  //   + = naik = merah
-  //   - = turun = hijau
-  //
-  // PENDAPATAN LAIN-LAIN / PENDAPATAN BUNGA / LABA (RUGI) SELISIH KURS:
-  //   + = turun = merah
-  //   - = naik = hijau
-  //
-  // Therefore, for all four current classifications:
-  // positive displayed value = red, negative displayed value = green.
-  const rules = {
-    "BEBAN BUNGA": { positive: "negative", negative: "positive" },
-    "PENDAPATAN LAIN-LAIN": { positive: "negative", negative: "positive" },
-    "PENDAPATAN BUNGA": { positive: "negative", negative: "positive" },
-    "LABA (RUGI) SELISIH KURS": { positive: "negative", negative: "positive" }
-  };
-
-  const rule = rules[classification] || { positive: "negative", negative: "positive" };
-  return n > 0 ? rule.positive : rule.negative;
+  return n > 0 ? "negative" : "positive";
 }
 
 function colLetters(ref){
@@ -971,11 +951,11 @@ function activityCard(c,key){
     <div class="metricrow">
       <div>
         <div class="label">${cfg.percentLabel}</div>
-        <div class="pct ${financialColorClass(c.name,a.percent)}">${fmtPct(a.percent)}</div>
+        <div class="pct ${percentColorClass(a.percent)}">${fmtPct(a.percent)}</div>
       </div>
       <div>
         <div class="label" style="text-align:right">${cfg.movementLabel}</div>
-        <div class="movement ${financialColorClass(c.name,a.movement)}">${a.movement>0?"+":""}${fmtAmount(a.movement)}</div>
+        <div class="movement">${a.movement>0?"+":""}${fmtAmount(a.movement)}</div>
       </div>
     </div>
     <div class="context">
@@ -1089,8 +1069,8 @@ function renderDetail(){
   $("detailSummary").innerHTML=`
     <div class="kpi"><span>${cfg.currentLabel}</span><strong>${fmtFullAmount(total.current)}</strong></div>
     <div class="kpi"><span>${cfg.previousLabel}</span><strong>${fmtFullAmount(total.previous)}</strong></div>
-    <div class="kpi"><span>${cfg.movementLabel}</span><strong class="${financialColorClass(c.name,total.movement)}">${total.movement>0?"+":""}${fmtFullAmount(total.movement)}</strong></div>
-    <div class="kpi"><span>${cfg.percentLabel}</span><strong class="${financialColorClass(c.name,total.percent)}">${fmtPct(total.percent)}</strong></div>`;
+    <div class="kpi"><span>${cfg.movementLabel}</span><strong >${total.movement>0?"+":""}${fmtFullAmount(total.movement)}</strong></div>
+    <div class="kpi"><span>${cfg.percentLabel}</span><strong class="${percentColorClass(total.percent)}">${fmtPct(total.percent)}</strong></div>`;
 
   $("detailThead").innerHTML=`<tr>
     <th>Account</th><th>Description</th><th>${cfg.previousLabel}</th><th>${cfg.currentLabel}</th>
@@ -1113,8 +1093,8 @@ function renderDetailRows(){
     <td class="desccell" title="${esc(r.description)}">${esc(r.description)}</td>
     <td>${fmtFullAmount(r.previous)}</td>
     <td>${fmtFullAmount(r.current)}</td>
-    <td class="${financialColorClass(activeClass,r.movement)}">${r.movement>0?"+":""}${fmtFullAmount(r.movement)}</td>
-    <td class="${financialColorClass(activeClass,r.percent)}">${fmtPct(r.percent)}</td>
+    <td >${r.movement>0?"+":""}${fmtFullAmount(r.movement)}</td>
+    <td class="${percentColorClass(r.percent)}">${fmtPct(r.percent)}</td>
   </tr>`).join("");
 
   // TOTAL always refers to ALL Detail Account-Description rows,
@@ -1128,8 +1108,8 @@ function renderDetailRows(){
     <td></td><td>TOTAL</td>
     <td>${fmtFullAmount(totalPrevious)}</td>
     <td>${fmtFullAmount(totalCurrent)}</td>
-    <td class="${financialColorClass(activeClass,totalMovement)}">${totalMovement>0?"+":""}${fmtFullAmount(totalMovement)}</td>
-    <td class="${financialColorClass(activeClass,totalPercent)}">${fmtPct(totalPercent)}</td>
+    <td >${totalMovement>0?"+":""}${fmtFullAmount(totalMovement)}</td>
+    <td class="${percentColorClass(totalPercent)}">${fmtPct(totalPercent)}</td>
   </tr>`;
   $("detailTbody").innerHTML=rowHtml+totalHtml;
 
