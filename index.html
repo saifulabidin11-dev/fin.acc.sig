@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Fluktuasi Laba Rugi</title>
+<meta name="description" content="Dashboard analisis fluktuasi MoM, YoY, dan YTD berbasis sheet Rekap.">
+<style>
+:root{
+  --navy:#0e2b47;--navy2:#173e63;--bg:#f4f7fa;--card:#fff;--ink:#172b3d;
+  --muted:#75889b;--line:#e2e9ef;--green:#0b8b63;--red:#ce4a55;--blue:#1677c8;
+  --soft:#f8fafc;--amber:#9a6d13;--shadow:0 4px 18px rgba(21,44,68,.045)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}
+button,input{font:inherit}
+header{background:linear-gradient(120deg,var(--navy),var(--navy2));color:white;padding:22px 28px 18px}
+.head{display:flex;justify-content:space-between;gap:22px;align-items:flex-start}
+.eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#9fc5e5;font-weight:800}
+h1{font-size:25px;margin:5px 0 6px}
+.sub{font-size:11px;color:#c7d8e6;line-height:1.45}
+.uploadbox{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.uploadrow{display:flex;gap:7px;align-items:center}
+.filelabel,.ghostbtn,.backbtn{
+  border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.09);color:white;
+  border-radius:8px;padding:8px 11px;font-size:9px;font-weight:800;cursor:pointer
+}
+.filelabel:hover,.ghostbtn:hover{background:rgba(255,255,255,.14)}
+#fileInput{display:none}
+.filesmall{font-size:8px;color:#bcd0df;max-width:320px;text-align:right}
+main{padding:18px 28px 44px}
+.status{
+  display:none;margin-bottom:13px;border-radius:10px;padding:10px 12px;font-size:9px;line-height:1.45
+}
+.status.show{display:block}
+.status.error{background:#fff0f1;border:1px solid #f2cdd1;color:#8e3039}
+.status.info{background:#edf6fd;border:1px solid #cfe3f4;color:#285d86}
+.status.success{background:#edf8f4;border:1px solid #cce8dc;color:#28644d}
+.topline{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;margin-bottom:12px}
+.sourceinfo{font-size:11px;font-weight:850;color:#294a65}
+.sourcehint{font-size:8px;color:#7f90a1;line-height:1.45;text-align:right}
+.empty-state{
+  background:white;border:1px solid var(--line);border-radius:15px;padding:52px 22px;text-align:center;box-shadow:var(--shadow)
+}
+.empty-state h2{font-size:17px;margin:0 0 7px;color:#23435f}
+.empty-state p{font-size:10px;line-height:1.55;color:#76899a;margin:0 auto 16px;max-width:560px}
+.empty-action{display:inline-block;background:#173e63;color:white;border-radius:8px;padding:9px 13px;font-size:9px;font-weight:850;cursor:pointer}
+.matrix{display:flex;flex-direction:column;gap:13px}
+.classcard{background:white;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:var(--shadow)}
+.classhead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 15px;border-bottom:1px solid var(--line)}
+.classname{font-size:12px;font-weight:900;color:#1d405e}
+.classmeta{font-size:8px;color:#8a99a7}
+.activities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.activity{padding:14px 15px;border-right:1px solid var(--line);min-height:222px;cursor:pointer}
+.activity:last-child{border-right:0}
+.activity:hover{background:#fbfdfe}
+.acthead{display:flex;justify-content:space-between;align-items:center}
+.acttitle{font-size:11px;font-weight:900;color:#254862}
+.rekaptag{font-size:8px;color:#8191a0;background:#f1f5f7;padding:4px 6px;border-radius:6px}
+.metricrow{display:grid;grid-template-columns:1fr .9fr;gap:12px;align-items:end;margin-top:11px}
+.label{font-size:8px;text-transform:uppercase;color:#8292a1;font-weight:800}
+.pct{font-size:29px;font-weight:950;letter-spacing:-.045em;margin-top:3px}
+.movement{font-size:16px;font-weight:900;text-align:right;margin-top:6px}
+.context{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.context div{background:var(--soft);border-radius:8px;padding:8px}
+.context span{display:block;font-size:7px;text-transform:uppercase;color:#8192a2;font-weight:800}
+.context b{display:block;font-size:10px;margin-top:4px}
+.keyreason{margin-top:10px;padding-top:9px;border-top:1px solid var(--line)}
+.keyreasonhead{display:flex;justify-content:space-between;gap:10px;font-size:8px;color:#76889a}
+.driver{margin-top:6px}
+.driveracct{font-size:9px;font-weight:900;color:#244864}
+.driverdesc{font-size:8px;color:#617588;margin-top:2px}
+.driverreason{font-size:8px;color:#465b6f;line-height:1.4;margin-top:4px;white-space:pre-wrap}
+.driverextra{font-size:8px;color:#8191a0;margin-top:5px}
+.positive{color:var(--green)}.negative{color:var(--red)}.neutral{color:#9aa6b1}
+.hidden{display:none!important}
+
+/* Detail */
+.detailhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+.detailtitle{font-size:18px;font-weight:900;color:#1d405e}
+.detailsub{font-size:9px;color:#8493a2;margin-top:3px}
+.backbtn{background:#fff;color:#385670;border-color:#dce5ec}
+.class-tabs,.activity-tabs{display:flex;gap:5px;overflow:auto;scrollbar-width:thin}
+.class-tabs{margin-bottom:8px}
+.activity-tabs{margin-bottom:12px}
+.tabbtn{
+  border:1px solid #dce5ec;background:#fff;color:#557087;border-radius:20px;
+  padding:7px 11px;font-size:9px;font-weight:850;cursor:pointer;white-space:nowrap
+}
+.tabbtn.active{background:#163e63;color:white;border-color:#163e63}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:13px}
+.kpi{background:white;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.kpi span{display:block;font-size:8px;text-transform:uppercase;color:#8393a2;font-weight:800}
+.kpi strong{display:block;font-size:17px;margin-top:6px}
+.tablecard,.reason-section{background:white;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:var(--shadow)}
+.tablehead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:14px 15px;border-bottom:1px solid var(--line)}
+.tabletitle{font-size:14px;font-weight:900;color:#1d405e}
+.tablesub{font-size:9px;color:#8493a2;margin-top:3px}
+.search{height:32px;border:1px solid #dce5ec;border-radius:8px;padding:0 10px;font-size:9px;min-width:240px}
+.tablewrap{overflow:auto;max-height:480px}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{position:sticky;top:0;background:#f5f8fb;color:#5b7185;font-size:8px;text-transform:uppercase;letter-spacing:.04em;padding:9px;text-align:right;border-bottom:1px solid #dbe3ea;white-space:nowrap}
+th:first-child,th:nth-child(2),td:first-child,td:nth-child(2){text-align:left}
+td{padding:10px 9px;border-bottom:1px solid #eef2f5;text-align:right;vertical-align:top;white-space:nowrap}
+tbody tr:hover{background:#fbfdfe}
+.acct{font-weight:900;color:#244864}
+.desccell{max-width:310px;overflow:hidden;text-overflow:ellipsis}
+.pareto-badge{display:inline-block;margin-left:5px;padding:2px 5px;border-radius:9px;background:#fff4cf;color:#765912;font-size:7px;font-weight:850;vertical-align:middle}
+.tablefooter{padding:10px 15px;background:#fbfcfd;border-top:1px solid var(--line);font-size:8px;color:#7e8e9d}
+.reason-section{margin-top:14px}
+.reason-head{padding:14px 15px;border-bottom:1px solid var(--line)}
+.reason-title{font-size:14px;font-weight:900;color:#1d405e}
+.reason-sub{font-size:9px;color:#8493a2;margin-top:3px}
+.reason-list{display:flex;flex-direction:column}
+.reason-card{display:grid;grid-template-columns:220px 1fr;border-bottom:1px solid var(--line)}
+.reason-card:last-child{border-bottom:0}
+.reason-side{padding:14px 15px;background:#fbfcfd;border-right:1px solid var(--line)}
+.reason-side .racc{font-size:10px;font-weight:900;color:#244864}
+.reason-side .rdesc{font-size:9px;color:#5f7386;line-height:1.4;margin-top:4px}
+.reason-main{padding:14px 16px}
+.reason-raw{font-size:10px;line-height:1.55;color:#344d63;white-space:pre-wrap;word-break:break-word}
+.no-reason{padding:18px;color:#94a1ad;font-size:9px}
+@media(max-width:980px){
+  .activities{grid-template-columns:1fr}
+  .activity{border-right:0;border-bottom:1px solid var(--line)}
+  .activity:last-child{border-bottom:0}
+  .summary{grid-template-columns:1fr 1fr}
+}
+@media(max-width:720px){
+  header{padding:18px 14px}main{padding:14px}
+  .head,.topline,.detailhead,.tablehead{flex-direction:column;align-items:stretch}
+  .uploadbox{align-items:stretch}.filesmall{text-align:left}
+  .sourcehint{text-align:left}.metricrow{grid-template-columns:1fr}.movement{text-align:left}
+  .summary{grid-template-columns:1fr}
+  .reason-card{grid-template-columns:1fr}.reason-side{border-right:0;border-bottom:1px solid var(--line)}
+  .search{min-width:0;width:100%}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="head">
+    <div>
+      <div class="eyebrow">Financial Accounting</div>
+      <h1>Dashboard Fluktuasi Laba Rugi</h1>
+      <div class="sub">Resume MoM, YoY, YTD dan detail Reasons berbasis satu-satunya sumber: sheet <b>Rekap</b>.</div>
+    </div>
+    <div class="uploadbox">
+      <div class="uploadrow">
+        <label class="filelabel" for="fileInput">Pilih Excel</label>
+        <input id="fileInput" type="file" accept=".xlsx,.xlsm">
+        <button class="ghostbtn" id="clearBtn" type="button">Hapus Data Lokal</button>
+      </div>
+      <div class="filesmall" id="fileSmall">File diproses seluruhnya di browser. Sheet selain Rekap tidak dibaca untuk analisis.</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="status" class="status"></div>
+
+  <section id="emptyPanel" class="empty-state">
+    <h2>Belum ada data dashboard</h2>
+    <p>Pilih file Excel yang memiliki sheet <b>Rekap</b>. Dashboard hanya membaca sheet Rekap dan mengabaikan seluruh sheet lainnya. Data tidak dikirim ke server.</p>
+    <label class="empty-action" for="fileInput">Pilih File Excel</label>
+  </section>
+
+  <section id="dashboardPanel" class="hidden">
+    <div class="topline">
+      <div class="sourceinfo" id="sourceInfo">-</div>
+      <div class="sourcehint">High level: Movement %, Movement Amount, Current, Previous, dan Key Reasons berbasis Pareto absolute movement 80%.</div>
+    </div>
+    <div id="matrix" class="matrix"></div>
+  </section>
+
+  <section id="detailPanel" class="hidden">
+    <div class="detailhead">
+      <div>
+        <div class="detailtitle" id="detailTitle">Detail</div>
+        <div class="detailsub">Detail Account-Description dan penjelasan Reasons sesuai isi tabel sumber.</div>
+      </div>
+      <button class="backbtn" id="backBtn" type="button">← Dashboard Resume</button>
+    </div>
+
+    <div id="classTabs" class="class-tabs"></div>
+    <div id="activityTabs" class="activity-tabs"></div>
+    <div id="detailSummary" class="summary"></div>
+
+    <div class="tablecard">
+      <div class="tablehead">
+        <div>
+          <div class="tabletitle">Detail Account-Description</div>
+          <div class="tablesub">Tabel hanya fokus pada angka. Reasons tersedia di bagian bawah.</div>
+        </div>
+        <input id="searchInput" class="search" placeholder="Cari Account / Description...">
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead id="detailThead"></thead>
+          <tbody id="detailTbody"></tbody>
+        </table>
+      </div>
+      <div class="tablefooter" id="tableFooter"></div>
+    </div>
+
+    <div class="reason-section">
+      <div class="reason-head">
+        <div class="reason-title">Detail Penjelasan Reasons</div>
+        <div class="reason-sub">Teks ditampilkan apa adanya dari AA / AD / AG sesuai activity dan Account-Description.</div>
+      </div>
+      <div id="reasonList" class="reason-list"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+
+/* =========================================================
+   CONFIGURATION — SOURCE OF TRUTH: SHEET "REKAP" ONLY
+   ========================================================= */
+const CLASSIFICATIONS = [
+  "BEBAN BUNGA PINJAMAN",
+  "PENDAPATAN KLAIM",
+  "PENDAPATAN BUNGA",
+  "LABA (RUGI) SELISIH KURS"
+];
+
+const ACTIVITY = {
+  mom: {
+    label: "MoM",
+    previous: "V",
+    current: "W",
+    movement: "Y",
+    percent: "Z",
+    reason: "AA",
+    previousLabel: "Previous",
+    currentLabel: "Current",
+    movementLabel: "Movement MoM",
+    percentLabel: "MoM %"
+  },
+  yoy: {
+    label: "YoY",
+    previous: "J",
+    current: "W",
+    movement: "AB",
+    percent: "AC",
+    reason: "AD",
+    previousLabel: "Previous LY",
+    currentLabel: "Current",
+    movementLabel: "Movement YoY",
+    percentLabel: "YoY %"
+  },
+  ytd: {
+    label: "YTD",
+    previous: "O",
+    current: "X",
+    movement: "AE",
+    percent: "AF",
+    reason: "AG",
+    previousLabel: "Previous YTD",
+    currentLabel: "Current YTD",
+    movementLabel: "Movement YTD",
+    percentLabel: "YTD %"
+  }
+};
+
+const PARETO_THRESHOLD = 0.80;
+const MAX_FILE_BYTES = 50 * 1024 * 1024;
+const MAX_XML_BYTES = 120 * 1024 * 1024;
+const CACHE_DB = "fluctuation-dashboard";
+const CACHE_STORE = "state";
+const CACHE_KEY = "lastParsedDashboard";
+
+let state = null;
+let activeClass = CLASSIFICATIONS[0];
+let activeActivity = "mom";
+
+/* =========================================================
+   SMALL HELPERS
+   ========================================================= */
+const $ = id => document.getElementById(id);
+
+function esc(value){
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  })[ch]);
+}
+
+function normalizeLabel(value){
+  return String(value ?? "").replace(/\s+/g, " ").trim().toUpperCase();
+}
+
+function rawReason(value){
+  return String(value ?? "").replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+}
+
+function parseNumber(value, {percent=false} = {}){
+  if(value === null || value === undefined || value === "") return null;
+  if(typeof value === "number") return Number.isFinite(value) ? value : null;
+  if(typeof value === "boolean") return value ? 1 : 0;
+
+  let s = String(value).trim();
+  if(!s) return null;
+  let negative = false;
+  if(/^\(.*\)$/.test(s)){
+    negative = true;
+    s = s.slice(1,-1).trim();
+  }
+  const hasPercent = s.includes("%");
+  s = s.replace(/%/g,"").replace(/Rp/gi,"").replace(/\s+/g,"");
+
+  // Indonesian / mixed accounting number support.
+  if(s.includes(".") && s.includes(",")){
+    // 1.234.567,89
+    s = s.replace(/\./g,"").replace(",",".");
+  } else if(s.includes(",")){
+    const parts = s.split(",");
+    if(parts.length === 2 && parts[1].length !== 3){
+      s = parts[0].replace(/\./g,"") + "." + parts[1];
+    } else {
+      s = s.replace(/,/g,"");
+    }
+  } else if(s.includes(".")){
+    const parts = s.split(".");
+    if(parts.length > 2 || (parts.length === 2 && parts[1].length === 3 && parts[0].length >= 1)){
+      s = parts.join("");
+    }
+  }
+
+  s = s.replace(/[^0-9+\-.eE]/g,"");
+  const n = Number(s);
+  if(!Number.isFinite(n)) return null;
+  let result = negative ? -Math.abs(n) : n;
+  if(hasPercent) result /= 100;
+  // Excel numeric percentage is already a fraction; do not divide again.
+  return result;
+}
+
+function fmtAmount(n){
+  if(n === null || n === undefined || !Number.isFinite(n)) return "—";
+  const a = Math.abs(n);
+  let v = n, suffix = "";
+  if(a >= 1e12){ v = n/1e12; suffix = " T"; }
+  else if(a >= 1e9){ v = n/1e9; suffix = " M"; }
+  else if(a >= 1e6){ v = n/1e6; suffix = " Jt"; }
+  else if(a >= 1e3){ v = n/1e3; suffix = " Rb"; }
+  return new Intl.NumberFormat("id-ID",{minimumFractionDigits:1,maximumFractionDigits:1}).format(v)+suffix;
+}
+
+function fmtPct(n){
+  if(n === null || n === undefined || !Number.isFinite(n)) return "—";
+  return new Intl.NumberFormat("id-ID",{minimumFractionDigits:1,maximumFractionDigits:1}).format(n*100)+"%";
+}
+
+function signClass(n){
+  if(n === null || n === undefined || !Number.isFinite(n) || n === 0) return "neutral";
+  return n > 0 ? "positive" : "negative";
+}
+
+function colLetters(ref){
+  const m = /^([A-Z]+)\d+$/i.exec(ref || "");
+  return m ? m[1].toUpperCase() : "";
+}
+
+function rowNumber(ref){
+  const m = /^[A-Z]+(\d+)$/i.exec(ref || "");
+  return m ? Number(m[1]) : null;
+}
+
+function colToNumber(col){
+  let n=0;
+  for(const ch of col.toUpperCase()) n=n*26+(ch.charCodeAt(0)-64);
+  return n;
+}
+
+function cellRef(col,row){ return `${col}${row}`; }
+
+function setStatus(message,type="info"){
+  const el=$("status");
+  el.className=`status show ${type}`;
+  el.textContent=message;
+}
+function clearStatus(){
+  const el=$("status");
+  el.className="status";
+  el.textContent="";
+}
+
+/* =========================================================
+   MINIMAL XLSX ZIP READER
+   Standalone: no external JS library and no server upload.
+   ========================================================= */
+class ZipArchive {
+  constructor(buffer){
+    this.bytes = new Uint8Array(buffer);
+    this.view = new DataView(buffer);
+    this.entries = new Map();
+    this.parseCentralDirectory();
+  }
+  u16(off){ return this.view.getUint16(off,true); }
+  u32(off){ return this.view.getUint32(off,true); }
+  parseCentralDirectory(){
+    const b=this.bytes;
+    const min=Math.max(0,b.length-0xFFFF-22);
+    let eocd=-1;
+    for(let i=b.length-22;i>=min;i--){
+      if(this.u32(i)===0x06054b50){ eocd=i; break; }
+    }
+    if(eocd<0) throw new Error("File bukan XLSX/ZIP yang valid.");
+    const total=this.u16(eocd+10);
+    const cdOffset=this.u32(eocd+16);
+    let p=cdOffset;
+    const decoder=new TextDecoder("utf-8");
+    for(let i=0;i<total;i++){
+      if(this.u32(p)!==0x02014b50) throw new Error("Central directory XLSX tidak valid.");
+      const method=this.u16(p+10);
+      const compressedSize=this.u32(p+20);
+      const uncompressedSize=this.u32(p+24);
+      const nameLen=this.u16(p+28);
+      const extraLen=this.u16(p+30);
+      const commentLen=this.u16(p+32);
+      const localOffset=this.u32(p+42);
+      const name=decoder.decode(b.slice(p+46,p+46+nameLen));
+      this.entries.set(name,{name,method,compressedSize,uncompressedSize,localOffset});
+      p += 46+nameLen+extraLen+commentLen;
+    }
+  }
+  has(name){ return this.entries.has(name); }
+  async text(name){
+    const data=await this.extract(name);
+    return new TextDecoder("utf-8").decode(data);
+  }
+  async extract(name){
+    const e=this.entries.get(name);
+    if(!e) throw new Error(`Bagian XLSX tidak ditemukan: ${name}`);
+    if(e.uncompressedSize>MAX_XML_BYTES) throw new Error(`Bagian XLSX terlalu besar: ${name}`);
+    const p=e.localOffset;
+    if(this.u32(p)!==0x04034b50) throw new Error("Local header XLSX tidak valid.");
+    const nameLen=this.u16(p+26);
+    const extraLen=this.u16(p+28);
+    const start=p+30+nameLen+extraLen;
+    const compressed=this.bytes.slice(start,start+e.compressedSize);
+    if(e.method===0) return compressed;
+    if(e.method!==8) throw new Error(`Metode kompresi XLSX tidak didukung (${e.method}).`);
+    if(typeof DecompressionStream==="undefined") throw new Error("Browser tidak mendukung decompression XLSX.");
+    const ds=new DecompressionStream("deflate-raw");
+    const stream=new Blob([compressed]).stream().pipeThrough(ds);
+    const ab=await new Response(stream).arrayBuffer();
+    return new Uint8Array(ab);
+  }
+}
+
+function xmlDoc(text,label){
+  const doc=new DOMParser().parseFromString(text,"application/xml");
+  if(doc.querySelector("parsererror")) throw new Error(`XML ${label} tidak valid.`);
+  return doc;
+}
+
+function resolveTarget(target){
+  let t=String(target||"").replace(/\\/g,"/");
+  if(t.startsWith("/")) return t.slice(1);
+  if(t.startsWith("xl/")) return t;
+  const parts=["xl"];
+  for(const part of t.split("/")){
+    if(part==="."||part==="") continue;
+    if(part==="..") parts.pop();
+    else parts.push(part);
+  }
+  return parts.join("/");
+}
+
+async function parseSharedStrings(zip){
+  if(!zip.has("xl/sharedStrings.xml")) return [];
+  const doc=xmlDoc(await zip.text("xl/sharedStrings.xml"),"sharedStrings");
+  return [...doc.getElementsByTagName("si")].map(si=>{
+    return [...si.getElementsByTagName("t")].map(t=>t.textContent||"").join("");
+  });
+}
+
+async function locateRekapSheet(zip){
+  if(!zip.has("xl/workbook.xml")) throw new Error("Workbook XLSX tidak valid.");
+  const workbook=xmlDoc(await zip.text("xl/workbook.xml"),"workbook");
+  const sheets=[...workbook.getElementsByTagName("sheet")];
+  const rekap=sheets.find(s=>normalizeLabel(s.getAttribute("name"))==="REKAP");
+  if(!rekap) throw new Error('Sheet "Rekap" tidak ditemukan.');
+
+  const rid = rekap.getAttribute("r:id") ||
+              rekap.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id");
+  if(!rid) throw new Error('Relasi sheet "Rekap" tidak ditemukan.');
+
+  const relPath="xl/_rels/workbook.xml.rels";
+  const rels=xmlDoc(await zip.text(relPath),"workbook relationships");
+  const rel=[...rels.getElementsByTagName("Relationship")].find(r=>r.getAttribute("Id")===rid);
+  if(!rel) throw new Error('Target sheet "Rekap" tidak ditemukan.');
+  return {sheetName:rekap.getAttribute("name"),path:resolveTarget(rel.getAttribute("Target"))};
+}
+
+async function parseRekapWorkbook(file){
+  if(!file) throw new Error("Pilih file Excel terlebih dahulu.");
+  if(file.size===0) throw new Error("File kosong.");
+  if(file.size>MAX_FILE_BYTES) throw new Error("Ukuran file melebihi 50 MB.");
+  if(!/\.(xlsx|xlsm)$/i.test(file.name)) throw new Error("Gunakan file .xlsx atau .xlsm.");
+
+  const buffer=await file.arrayBuffer();
+  const zip=new ZipArchive(buffer);
+  const {sheetName,path}=await locateRekapSheet(zip);
+  const shared=await parseSharedStrings(zip);
+  const sheet=xmlDoc(await zip.text(path),sheetName);
+
+  const cells=new Map();
+  const missingCachedFormula=[];
+  let maxRow=0;
+
+  for(const c of sheet.getElementsByTagName("c")){
+    const ref=(c.getAttribute("r")||"").toUpperCase();
+    if(!ref) continue;
+    const col=colLetters(ref);
+    const row=rowNumber(ref);
+    if(!row || colToNumber(col)>colToNumber("AG")) continue;
+    maxRow=Math.max(maxRow,row);
+
+    const t=c.getAttribute("t")||"";
+    const v=c.getElementsByTagName("v")[0];
+    const f=c.getElementsByTagName("f")[0];
+    let value=null;
+
+    if(t==="inlineStr"){
+      const is=c.getElementsByTagName("is")[0];
+      value=is ? [...is.getElementsByTagName("t")].map(x=>x.textContent||"").join("") : "";
+    } else if(t==="s"){
+      const idx=v ? Number(v.textContent) : NaN;
+      value=Number.isInteger(idx) ? (shared[idx] ?? "") : "";
+    } else if(t==="str"){
+      value=v ? (v.textContent ?? "") : "";
+    } else if(t==="b"){
+      value=v ? v.textContent==="1" : false;
+    } else if(t==="e"){
+      value=null;
+    } else {
+      if(v && v.textContent!==""){
+        const num=Number(v.textContent);
+        value=Number.isFinite(num) ? num : v.textContent;
+      } else value=null;
+    }
+
+    if(f && !v) missingCachedFormula.push(ref);
+    cells.set(ref,value);
+  }
+
+  const get=(col,row)=>cells.get(cellRef(col,row)) ?? null;
+
+  // Locate the four required classification rows.
+  const classRows=new Map();
+  for(let row=1;row<=maxRow;row++){
+    const b=normalizeLabel(get("B",row));
+    const match=CLASSIFICATIONS.find(x=>normalizeLabel(x)===b);
+    if(match && !classRows.has(match)) classRows.set(match,row);
+  }
+  const missing=CLASSIFICATIONS.filter(x=>!classRows.has(x));
+  if(missing.length) throw new Error(`Klasifikasi tidak ditemukan pada sheet Rekap: ${missing.join(", ")}`);
+
+  const sortedHeaders=[...classRows.entries()]
+    .map(([name,row])=>({name,row}))
+    .sort((a,b)=>a.row-b.row);
+
+  function looksLikeSectionHeader(row){
+    const a=get("A",row), b=get("B",row);
+    if(a!==null && String(a).trim()!=="") return false;
+    if(b===null || String(b).trim()==="") return false;
+    const cols=["J","O","V","W","X","Y","Z","AB","AC","AE","AF"];
+    const hasNumbers=cols.some(col=>parseNumber(get(col,row),{percent:["Z","AC","AF"].includes(col)})!==null);
+    const text=String(b).trim();
+    const uppercase=text===text.toUpperCase() && /[A-Z]/.test(text);
+    return hasNumbers || uppercase;
+  }
+
+  function endOfBlock(headerRow,nextTargetRow){
+    const hardEnd=nextTargetRow ? nextTargetRow-1 : maxRow;
+    let seenAccount=false;
+    for(let row=headerRow+1;row<=hardEnd;row++){
+      const a=get("A",row), b=get("B",row);
+      const isAccount=a!==null && String(a).trim()!=="" && b!==null && String(b).trim()!=="";
+      if(isAccount){ seenAccount=true; continue; }
+      if(seenAccount && looksLikeSectionHeader(row)) return row-1;
+    }
+    return hardEnd;
+  }
+
+  const classes=[];
+  for(let i=0;i<sortedHeaders.length;i++){
+    const h=sortedHeaders[i];
+    const next=sortedHeaders[i+1]?.row ?? null;
+    const end=endOfBlock(h.row,next);
+
+    const activities={};
+    for(const [key,cfg] of Object.entries(ACTIVITY)){
+      const total={
+        previous:parseNumber(get(cfg.previous,h.row)),
+        current:parseNumber(get(cfg.current,h.row)),
+        movement:parseNumber(get(cfg.movement,h.row)),
+        percent:parseNumber(get(cfg.percent,h.row),{percent:true})
+      };
+
+      const rows=[];
+      for(let row=h.row+1;row<=end;row++){
+        const account=get("A",row);
+        const description=get("B",row);
+        if(account===null || String(account).trim()==="" || description===null || String(description).trim()==="") continue;
+
+        rows.push({
+          row,
+          account:String(account).trim(),
+          description:String(description).trim(),
+          previous:parseNumber(get(cfg.previous,row)),
+          current:parseNumber(get(cfg.current,row)),
+          movement:parseNumber(get(cfg.movement,row)),
+          percent:parseNumber(get(cfg.percent,row),{percent:true}),
+          reason:rawReason(get(cfg.reason,row))
+        });
+      }
+
+      const movable=rows
+        .filter(r=>Number.isFinite(r.movement) && Math.abs(r.movement)>0)
+        .sort((a,b)=>Math.abs(b.movement)-Math.abs(a.movement));
+      const gross=movable.reduce((s,r)=>s+Math.abs(r.movement),0);
+      let cum=0;
+      const pareto=[];
+      for(const r of movable){
+        const share=gross>0 ? Math.abs(r.movement)/gross : 0;
+        cum+=share;
+        pareto.push({...r,share,cumulative:Math.min(1,cum)});
+        if(cum>=PARETO_THRESHOLD) break;
+      }
+      const paretoAccounts=new Set(pareto.map(r=>r.account));
+
+      activities[key]={...total,rows,pareto,paretoAccounts:[...paretoAccounts],grossAbsoluteMovement:gross};
+    }
+    classes.push({name:h.name,headerRow:h.row,endRow:end,activities});
+  }
+
+  const relevantFormulaRefs=new Set();
+  for(const c of classes){
+    for(const cfg of Object.values(ACTIVITY)){
+      relevantFormulaRefs.add(cellRef(cfg.previous,c.headerRow));
+      relevantFormulaRefs.add(cellRef(cfg.current,c.headerRow));
+      relevantFormulaRefs.add(cellRef(cfg.movement,c.headerRow));
+      relevantFormulaRefs.add(cellRef(cfg.percent,c.headerRow));
+    }
+  }
+  const formulaWarnings=missingCachedFormula.filter(ref=>relevantFormulaRefs.has(ref));
+
+  return {
+    version:1,
+    fileName:file.name,
+    fileSize:file.size,
+    processedAt:new Date().toISOString(),
+    sheetName,
+    classes,
+    warnings: formulaWarnings.length
+      ? [`${formulaWarnings.length} formula pada baris total tidak memiliki cached value. Buka dan Save file di Excel lalu upload kembali bila angka tampil kosong.`]
+      : []
+  };
+}
+
+/* =========================================================
+   INDEXEDDB — CACHE PARSED DATA LOCALLY, NOT THE EXCEL FILE
+   ========================================================= */
+function openCache(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(CACHE_DB,1);
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains(CACHE_STORE)) db.createObjectStore(CACHE_STORE);
+    };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function saveCache(value){
+  try{
+    const db=await openCache();
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(CACHE_STORE,"readwrite");
+      tx.objectStore(CACHE_STORE).put(value,CACHE_KEY);
+      tx.oncomplete=resolve; tx.onerror=()=>reject(tx.error);
+    });
+    db.close();
+  }catch(e){ console.warn("Cache save failed",e); }
+}
+async function loadCache(){
+  try{
+    const db=await openCache();
+    const value=await new Promise((resolve,reject)=>{
+      const tx=db.transaction(CACHE_STORE,"readonly");
+      const req=tx.objectStore(CACHE_STORE).get(CACHE_KEY);
+      req.onsuccess=()=>resolve(req.result||null);
+      req.onerror=()=>reject(req.error);
+    });
+    db.close();
+    return value;
+  }catch(e){ return null; }
+}
+async function clearCache(){
+  try{
+    const db=await openCache();
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction(CACHE_STORE,"readwrite");
+      tx.objectStore(CACHE_STORE).delete(CACHE_KEY);
+      tx.oncomplete=resolve; tx.onerror=()=>reject(tx.error);
+    });
+    db.close();
+  }catch(e){}
+}
+
+/* =========================================================
+   RENDERING
+   ========================================================= */
+function getClass(name){ return state?.classes?.find(c=>c.name===name) || null; }
+
+function keyReasonHTML(activity){
+  const pareto=activity.pareto || [];
+  if(!pareto.length) return `<div class="driverextra">Tidak ada movement account.</div>`;
+  const visible=pareto.slice(0,2);
+  const parts=visible.map(r=>`
+    <div class="driver">
+      <div class="driveracct">${esc(r.account)} · ${fmtPct(r.share)}</div>
+      <div class="driverdesc">${esc(r.description)}</div>
+      ${r.reason ? `<div class="driverreason">${esc(r.reason)}</div>` : ""}
+    </div>`).join("");
+  const extra=pareto.length>2 ? `<div class="driverextra">+${pareto.length-2} driver Pareto lainnya di detail.</div>` : "";
+  return parts+extra;
+}
+
+function activityCard(c,key){
+  const a=c.activities[key], cfg=ACTIVITY[key];
+  return `<div class="activity" data-class="${esc(c.name)}" data-activity="${key}">
+    <div class="acthead">
+      <div class="acttitle">${cfg.label}</div>
+      <div class="rekaptag">Rekap</div>
+    </div>
+    <div class="metricrow">
+      <div>
+        <div class="label">${cfg.percentLabel}</div>
+        <div class="pct ${signClass(a.percent)}">${fmtPct(a.percent)}</div>
+      </div>
+      <div>
+        <div class="label" style="text-align:right">${cfg.movementLabel}</div>
+        <div class="movement ${signClass(a.movement)}">${a.movement>0?"+":""}${fmtAmount(a.movement)}</div>
+      </div>
+    </div>
+    <div class="context">
+      <div><span>${cfg.currentLabel}</span><b>${fmtAmount(a.current)}</b></div>
+      <div><span>${cfg.previousLabel}</span><b>${fmtAmount(a.previous)}</b></div>
+    </div>
+    <div class="keyreason">
+      <div class="keyreasonhead">
+        <b>Key Reasons · Pareto 80%</b>
+        <span>${a.pareto?.length || 0} account</span>
+      </div>
+      ${keyReasonHTML(a)}
+    </div>
+  </div>`;
+}
+
+function renderDashboard(){
+  if(!state){
+    $("emptyPanel").classList.remove("hidden");
+    $("dashboardPanel").classList.add("hidden");
+    $("detailPanel").classList.add("hidden");
+    return;
+  }
+  $("emptyPanel").classList.add("hidden");
+  $("detailPanel").classList.add("hidden");
+  $("dashboardPanel").classList.remove("hidden");
+  $("sourceInfo").textContent=`${state.fileName} · sheet ${state.sheetName}`;
+  $("fileSmall").textContent=`Aktif: ${state.fileName} · diproses lokal di browser`;
+
+  $("matrix").innerHTML=state.classes.map(c=>`
+    <div class="classcard">
+      <div class="classhead">
+        <div class="classname">${esc(c.name)}</div>
+        <div class="classmeta">${c.activities.mom.rows.length} Account-Description</div>
+      </div>
+      <div class="activities">
+        ${activityCard(c,"mom")}
+        ${activityCard(c,"yoy")}
+        ${activityCard(c,"ytd")}
+      </div>
+    </div>`).join("");
+
+  document.querySelectorAll(".activity[data-class]").forEach(el=>{
+    el.addEventListener("click",()=>{
+      activeClass=el.dataset.class;
+      activeActivity=el.dataset.activity;
+      $("searchInput").value="";
+      renderDetail();
+      window.scrollTo({top:0,behavior:"smooth"});
+    });
+  });
+}
+
+function renderTabs(){
+  $("classTabs").innerHTML=CLASSIFICATIONS.map(name=>
+    `<button class="tabbtn ${name===activeClass?"active":""}" data-c="${esc(name)}">${esc(name)}</button>`
+  ).join("");
+  $("classTabs").querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>{
+    activeClass=b.dataset.c;
+    $("searchInput").value="";
+    renderDetail();
+  }));
+
+  $("activityTabs").innerHTML=Object.entries(ACTIVITY).map(([key,cfg])=>
+    `<button class="tabbtn ${key===activeActivity?"active":""}" data-a="${key}">${cfg.label}</button>`
+  ).join("");
+  $("activityTabs").querySelectorAll("[data-a]").forEach(b=>b.addEventListener("click",()=>{
+    activeActivity=b.dataset.a;
+    $("searchInput").value="";
+    renderDetail();
+  }));
+}
+
+function renderDetail(){
+  if(!state) return renderDashboard();
+  const c=getClass(activeClass) || state.classes[0];
+  activeClass=c.name;
+  const a=c.activities[activeActivity];
+  const cfg=ACTIVITY[activeActivity];
+
+  $("dashboardPanel").classList.add("hidden");
+  $("emptyPanel").classList.add("hidden");
+  $("detailPanel").classList.remove("hidden");
+  $("detailTitle").textContent=`${c.name} · ${cfg.label}`;
+
+  renderTabs();
+
+  $("detailSummary").innerHTML=`
+    <div class="kpi"><span>${cfg.currentLabel}</span><strong>${fmtAmount(a.current)}</strong></div>
+    <div class="kpi"><span>${cfg.previousLabel}</span><strong>${fmtAmount(a.previous)}</strong></div>
+    <div class="kpi"><span>${cfg.movementLabel}</span><strong class="${signClass(a.movement)}">${a.movement>0?"+":""}${fmtAmount(a.movement)}</strong></div>
+    <div class="kpi"><span>${cfg.percentLabel}</span><strong class="${signClass(a.percent)}">${fmtPct(a.percent)}</strong></div>`;
+
+  $("detailThead").innerHTML=`<tr>
+    <th>Account</th><th>Description</th><th>${cfg.previousLabel}</th><th>${cfg.currentLabel}</th>
+    <th>${cfg.movementLabel}</th><th>${cfg.percentLabel}</th>
+  </tr>`;
+
+  renderDetailRows();
+  $("tableFooter").textContent=`Mapping sheet Rekap: Account A · Description B · Previous ${cfg.previous} · Current ${cfg.current} · Movement ${cfg.movement} · % ${cfg.percent} · Reasons ${cfg.reason}.`;
+}
+
+function renderDetailRows(){
+  const c=getClass(activeClass);
+  if(!c) return;
+  const a=c.activities[activeActivity];
+  const q=normalizeLabel($("searchInput").value);
+  const pareto=new Set(a.paretoAccounts||[]);
+  const rows=a.rows.filter(r=>!q || normalizeLabel(`${r.account} ${r.description}`).includes(q));
+
+  $("detailTbody").innerHTML=rows.map(r=>`<tr>
+    <td class="acct">${esc(r.account)}${pareto.has(r.account)?'<span class="pareto-badge">PARETO</span>':""}</td>
+    <td class="desccell" title="${esc(r.description)}">${esc(r.description)}</td>
+    <td>${fmtAmount(r.previous)}</td>
+    <td>${fmtAmount(r.current)}</td>
+    <td class="${signClass(r.movement)}">${r.movement>0?"+":""}${fmtAmount(r.movement)}</td>
+    <td class="${signClass(r.percent)}">${fmtPct(r.percent)}</td>
+  </tr>`).join("");
+
+  const reasonRows=a.rows.filter(r=>r.reason && r.reason.trim()!=="");
+  $("reasonList").innerHTML=reasonRows.length ? reasonRows.map(r=>`<div class="reason-card">
+    <div class="reason-side">
+      <div class="racc">${esc(r.account)}</div>
+      <div class="rdesc">${esc(r.description)}</div>
+    </div>
+    <div class="reason-main">
+      <div class="reason-raw">${esc(r.reason)}</div>
+    </div>
+  </div>`).join("") : `<div class="no-reason">Tidak ada Reasons pada data sumber untuk activity ini.</div>`;
+}
+
+/* =========================================================
+   EVENTS
+   ========================================================= */
+$("fileInput").addEventListener("change",async event=>{
+  const file=event.target.files?.[0];
+  if(!file) return;
+  clearStatus();
+  setStatus(`Memproses ${file.name}...`,"info");
+  try{
+    const parsed=await parseRekapWorkbook(file);
+    state=parsed;
+    activeClass=CLASSIFICATIONS[0];
+    activeActivity="mom";
+    await saveCache(state);
+    renderDashboard();
+    const warning=parsed.warnings?.length ? ` ${parsed.warnings.join(" ")}` : "";
+    setStatus(`Berhasil memuat sheet ${parsed.sheetName}. Empat klasifikasi siap dianalisis.${warning}`,"success");
+  }catch(err){
+    console.error(err);
+    setStatus(err?.message || "Gagal memproses file Excel.","error");
+  }finally{
+    event.target.value="";
+  }
+});
+
+$("clearBtn").addEventListener("click",async()=>{
+  await clearCache();
+  state=null;
+  activeClass=CLASSIFICATIONS[0];
+  activeActivity="mom";
+  $("fileSmall").textContent="File diproses seluruhnya di browser. Sheet selain Rekap tidak dibaca untuk analisis.";
+  setStatus("Data dashboard lokal telah dihapus.","info");
+  renderDashboard();
+});
+
+$("backBtn").addEventListener("click",()=>{
+  renderDashboard();
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+$("searchInput").addEventListener("input",renderDetailRows);
+
+(async function init(){
+  const cached=await loadCache();
+  if(cached?.classes?.length){
+    state=cached;
+    activeClass=CLASSIFICATIONS[0];
+    activeActivity="mom";
+    renderDashboard();
+    setStatus(`Data lokal terakhir dipulihkan: ${cached.fileName}`,"info");
+  }else{
+    renderDashboard();
+  }
+})();
+</script>
+</body>
+</html>
