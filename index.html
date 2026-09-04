@@ -7,29 +7,28 @@
 <meta name="description" content="Dashboard analisis fluktuasi MoM, YoY, dan YTD berbasis sheet Rekap.">
 <style>
 :root{
-  --navy:#1b3348;--navy2:#315675;--bg:#f5f7fa;--card:#ffffff;--ink:#1d2c3a;
-  --muted:#748596;--line:#e5eaf0;--green:#2c8b73;--red:#c95b66;--blue:#5d86b5;
-  --soft:#fbfcfd;--amber:#a78343;
-  --shadow:0 8px 26px rgba(28,48,68,.055);
-  --shadow-hover:0 12px 30px rgba(28,48,68,.08);
-  --gold:#b79a67;--gold-soft:#f5f0e7;
+  --navy:#15344f;--navy2:#245d87;--bg:#f4f7fa;--card:#ffffff;--ink:#1c2c3b;
+  --muted:#718294;--line:#e3e9ef;--green:#16856d;--red:#d44f5d;--blue:#2f78bd;
+  --soft:#fbfcfd;--amber:#c58a24;
+  --shadow:0 8px 24px rgba(24,49,73,.06);
+  --shadow-hover:0 14px 34px rgba(24,49,73,.11);
 
-  --mom-bg:#f2f6fb;--mom-accent:#7f9fc0;
-  --yoy-bg:#f2f8f5;--yoy-accent:#7fae9c;
-  --ytd-bg:#f6f3fa;--ytd-accent:#9a8eb5;
+  --mom-bg:#f8fbff;--mom-accent:#2f80d0;
+  --yoy-bg:#f7fcfa;--yoy-accent:#1d9a78;
+  --ytd-bg:#fbf9ff;--ytd-accent:#7657c8;
 
-  --class1:#f1f5fa;--class1-line:#8fa8c2;
-  --class2:#f2f8f5;--class2-line:#8caf9e;
-  --class3:#fbf7ef;--class3-line:#bca87a;
-  --class4:#f6f3fa;--class4-line:#a397bb;
+  --class1:#f7faff;--class1-line:#3d7fc0;
+  --class2:#f7fcfa;--class2-line:#299575;
+  --class3:#fffaf3;--class3-line:#c88a2b;
+  --class4:#fbf9ff;--class4-line:#7657c8;
 
-  --kpi1:#f2f6fb;--kpi2:#f2f8f5;--kpi3:#fbf7ef;--kpi4:#f6f3fa;
+  --kpi1:#ffffff;--kpi2:#ffffff;--kpi3:#ffffff;--kpi4:#ffffff;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:linear-gradient(180deg,#f8fafc 0%,var(--bg) 100%);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink);letter-spacing:.002em}
 button,input{font:inherit}
-header{background:linear-gradient(120deg,#1b3348 0%,#2d516e 72%,#3e617d 100%);color:white;padding:24px 30px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+header{background:linear-gradient(120deg,#14324c 0%,#1e557f 62%,#2b6a95 100%);color:white;padding:24px 30px 20px;border-bottom:1px solid rgba(255,255,255,.10)}
 .head{display:flex;justify-content:space-between;gap:22px;align-items:flex-start}
 .eyebrow{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#c7d7e4;font-weight:800}
 h1{font-size:26px;margin:6px 0 6px;font-weight:850;letter-spacing:-.02em}
@@ -52,7 +51,7 @@ main{padding:20px 30px 46px;max-width:1900px;margin:0 auto}
 .status.info{background:#edf6fd;border:1px solid #cfe3f4;color:#285d86}
 .status.success{background:#edf8f4;border:1px solid #cce8dc;color:#28644d}
 .topline{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;margin-bottom:13px;padding-bottom:9px;border-bottom:1px solid rgba(183,154,103,.18)}
-.sourceinfo{font-size:11px;font-weight:850;color:#294a65}
+.sourceinfo{font-size:11px;font-weight:900;color:#214b6a}
 .sourcehint{font-size:8px;color:#7f90a1;line-height:1.45;text-align:right}
 .empty-state{
   background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%);border:1px solid var(--line);border-radius:20px;padding:56px 24px;text-align:center;box-shadow:var(--shadow)
@@ -63,25 +62,25 @@ main{padding:20px 30px 46px;max-width:1900px;margin:0 auto}
 .matrix{display:flex;flex-direction:column;gap:13px}
 .classcard{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);transition:.18s ease}.classcard:hover{box-shadow:var(--shadow-hover);transform:translateY(-1px)}
 .classhead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
-.classcard:nth-of-type(1) .classhead{background:var(--class1);border-left:6px solid var(--class1-line)}
-.classcard:nth-of-type(2) .classhead{background:var(--class2);border-left:6px solid var(--class2-line)}
-.classcard:nth-of-type(3) .classhead{background:var(--class3);border-left:6px solid var(--class3-line)}
-.classcard:nth-of-type(4) .classhead{background:var(--class4);border-left:6px solid var(--class4-line)}
+.classcard:nth-of-type(1) .classhead{background:var(--class1);border-left:7px solid var(--class1-line)}
+.classcard:nth-of-type(2) .classhead{background:var(--class2);border-left:7px solid var(--class2-line)}
+.classcard:nth-of-type(3) .classhead{background:var(--class3);border-left:7px solid var(--class3-line)}
+.classcard:nth-of-type(4) .classhead{background:var(--class4);border-left:7px solid var(--class4-line)}
 .classname{font-size:12px;font-weight:850;color:#243f55;letter-spacing:-.005em}
 .classmeta{font-size:8px;color:#8897a6;background:rgba(255,255,255,.58);padding:4px 7px;border-radius:8px;border:1px solid rgba(90,111,130,.08)}
 .activities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .activity{padding:16px 16px 15px;border-right:1px solid var(--line);min-height:226px;cursor:pointer;position:relative;transition:.18s ease}
 .activity:last-child{border-right:0}
-.activity[data-activity="mom"]{background:linear-gradient(180deg,var(--mom-bg) 0%, #ffffff 88%)}
-.activity[data-activity="yoy"]{background:linear-gradient(180deg,var(--yoy-bg) 0%, #ffffff 88%)}
-.activity[data-activity="ytd"]{background:linear-gradient(180deg,var(--ytd-bg) 0%, #ffffff 88%)}
-.activity[data-activity="mom"]::before,.activity[data-activity="yoy"]::before,.activity[data-activity="ytd"]::before{content:"";position:absolute;left:0;right:0;top:0;height:4px}
+.activity[data-activity="mom"]{background:linear-gradient(180deg,var(--mom-bg) 0%, #ffffff 60%)}
+.activity[data-activity="yoy"]{background:linear-gradient(180deg,var(--yoy-bg) 0%, #ffffff 60%)}
+.activity[data-activity="ytd"]{background:linear-gradient(180deg,var(--ytd-bg) 0%, #ffffff 60%)}
+.activity[data-activity="mom"]::before,.activity[data-activity="yoy"]::before,.activity[data-activity="ytd"]::before{content:"";position:absolute;left:0;right:0;top:0;height:5px}
 .activity[data-activity="mom"]::before{background:var(--mom-accent)}
 .activity[data-activity="yoy"]::before{background:var(--yoy-accent)}
 .activity[data-activity="ytd"]::before{background:var(--ytd-accent)}
 .activity:hover{filter:brightness(.998);transform:translateY(-1px)}
 .acthead{display:flex;justify-content:space-between;align-items:center}
-.acttitle{font-size:11px;font-weight:850;color:#2b4a61;letter-spacing:.01em}
+.acttitle{font-size:11px;font-weight:900;color:#27485f;letter-spacing:.01em}
 .rekaptag{font-size:8px;color:#6f7f8f;background:rgba(255,255,255,.75);padding:4px 7px;border-radius:8px;border:1px solid rgba(108,135,162,.10)}
 .metricrow{display:grid;grid-template-columns:1fr .9fr;gap:12px;align-items:end;margin-top:11px}
 .label{font-size:8px;text-transform:uppercase;color:#8292a1;font-weight:800}
@@ -98,7 +97,7 @@ main{padding:20px 30px 46px;max-width:1900px;margin:0 auto}
 .driverdesc{font-size:8px;color:#617588;margin-top:2px}
 .driverreason{font-size:8px;color:#465b6f;line-height:1.4;margin-top:4px;white-space:pre-wrap}
 .driverextra{font-size:8px;color:#8191a0;margin-top:5px}
-.positive{color:var(--green)}.negative{color:var(--red)}.neutral{color:#9aa6b1}
+.positive{color:var(--green);font-weight:800}.negative{color:var(--red);font-weight:800}.neutral{color:#94a2af}
 .hidden{display:none!important}
 
 /* Detail */
@@ -114,15 +113,19 @@ main{padding:20px 30px 46px;max-width:1900px;margin:0 auto}
   padding:7px 11px;font-size:9px;font-weight:850;cursor:pointer;white-space:nowrap;transition:.15s ease
 }
 .tabbtn:hover{background:#f6f8fb;transform:translateY(-1px)}
-.tabbtn.active{background:#315675;color:white;border-color:#315675;box-shadow:0 5px 12px rgba(49,86,117,.14)}
+.tabbtn.active{background:#245d87;color:white;border-color:#245d87;box-shadow:0 6px 14px rgba(36,93,135,.18)}
 .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:13px}
-.kpi{background:white;border:1px solid var(--line);border-radius:16px;padding:13px 15px;box-shadow:var(--shadow);position:relative;overflow:hidden}.kpi::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--gold);opacity:.32}
+.kpi{background:white;border:1px solid var(--line);border-radius:16px;padding:13px 15px;box-shadow:var(--shadow);position:relative;overflow:hidden}.kpi::after{content:"";position:absolute;left:0;right:0;top:0;height:4px}
 .summary .kpi:nth-child(1){background:var(--kpi1)}
+.summary .kpi:nth-child(1)::after{background:#2f80d0}
 .summary .kpi:nth-child(2){background:var(--kpi2)}
+.summary .kpi:nth-child(2)::after{background:#1d9a78}
 .summary .kpi:nth-child(3){background:var(--kpi3)}
+.summary .kpi:nth-child(3)::after{background:#c88a2b}
 .summary .kpi:nth-child(4){background:var(--kpi4)}
+.summary .kpi:nth-child(4)::after{background:#7657c8}
 .kpi span{display:block;font-size:8px;text-transform:uppercase;color:#8393a2;font-weight:800}
-.kpi strong{display:block;font-size:18px;margin-top:7px;font-weight:850;letter-spacing:-.015em}
+.kpi strong{display:block;font-size:18px;margin-top:7px;font-weight:850;letter-spacing:-.015em;font-variant-numeric:tabular-nums}
 .tablecard,.reason-section{background:rgba(255,255,255,.98);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
 .tablehead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:15px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fdfefe 0%,#fafbfd 100%)}
 .tabletitle{font-size:14px;font-weight:900;color:#1d405e}
@@ -132,11 +135,11 @@ main{padding:20px 30px 46px;max-width:1900px;margin:0 auto}
 table{width:100%;border-collapse:collapse;font-size:10px}
 th{position:sticky;top:0;background:#f6f8fa;color:#607386;font-size:8px;text-transform:uppercase;letter-spacing:.055em;padding:10px 9px;text-align:right;border-bottom:1px solid #dbe3ea;white-space:nowrap}
 th:first-child,th:nth-child(2),td:first-child,td:nth-child(2){text-align:left}
-td{padding:11px 9px;border-bottom:1px solid #eef2f5;text-align:right;vertical-align:top;white-space:nowrap}
-tbody tr:hover{background:#fafcfd}.total-row td{font-weight:900;background:#f5f8fb;border-top:2px solid #dbe3ea}
+td{padding:11px 9px;border-bottom:1px solid #eef2f5;text-align:right;vertical-align:top;white-space:nowrap;font-variant-numeric:tabular-nums}
+tbody tr:hover{background:#fafcfd}.total-row td{font-weight:900;background:#edf4f9;border-top:2px solid #b8cad8;font-variant-numeric:tabular-nums}
 .acct{font-weight:900;color:#244864}
 .desccell{max-width:310px;overflow:hidden;text-overflow:ellipsis}
-.pareto-badge{display:inline-block;margin-left:5px;padding:2px 6px;border-radius:9px;background:var(--gold-soft);color:#7e673c;font-size:7px;font-weight:850;vertical-align:middle;border:1px solid #e7dbc4}
+.pareto-badge{display:inline-block;margin-left:5px;padding:2px 6px;border-radius:9px;background:#fff3da;color:#8c6118;font-size:7px;font-weight:900;vertical-align:middle;border:1px solid #e5c77b}
 .tablefooter{padding:10px 15px;background:#fbfcfd;border-top:1px solid var(--line);font-size:8px;color:#7e8e9d}
 .reason-section{margin-top:14px}
 .reason-head{padding:15px 16px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fdfefe 0%,#fafbfd 100%)}
@@ -145,7 +148,7 @@ tbody tr:hover{background:#fafcfd}.total-row td{font-weight:900;background:#f5f8
 .reason-list{display:flex;flex-direction:column}
 .reason-card{display:grid;grid-template-columns:220px 1fr;border-bottom:1px solid var(--line)}
 .reason-card:last-child{border-bottom:0}
-.reason-side{padding:14px 15px;background:linear-gradient(180deg,#f6f8fb 0%,#fbfcfd 100%);border-right:1px solid var(--line)}
+.reason-side{padding:14px 15px;background:linear-gradient(180deg,#f3f7fb 0%,#fbfcfd 100%);border-right:1px solid var(--line)}
 .reason-side .racc{font-size:10px;font-weight:900;color:#244864}
 .reason-side .rdesc{font-size:9px;color:#5f7386;line-height:1.4;margin-top:4px}
 .reason-main{padding:14px 16px}
@@ -301,7 +304,7 @@ const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_XML_BYTES = 120 * 1024 * 1024;
 const CACHE_DB = "fluctuation-dashboard";
 const CACHE_STORE = "state";
-const CACHE_KEY = "lastParsedDashboard";
+const CACHE_KEY = "lastParsedDashboardV6";
 
 let state = null;
 let activeClass = CLASSIFICATIONS[0];
@@ -377,6 +380,29 @@ function fmtAmount(n){
   else if(a >= 1e6){ v = n/1e6; suffix = " Jt"; }
   else if(a >= 1e3){ v = n/1e3; suffix = " Rb"; }
   return new Intl.NumberFormat("id-ID",{minimumFractionDigits:1,maximumFractionDigits:1}).format(v)+suffix;
+}
+
+function fmtFullAmount(n){
+  if(n === null || n === undefined || !Number.isFinite(n)) return "—";
+  return new Intl.NumberFormat("id-ID",{
+    minimumFractionDigits:0,
+    maximumFractionDigits:0
+  }).format(n);
+}
+
+function aggregateActivityRows(activity){
+  const rows = activity?.rows || [];
+  const sumField = field => {
+    const values = rows.map(r=>r[field]).filter(v=>Number.isFinite(v));
+    return values.length ? values.reduce((sum,v)=>sum+v,0) : null;
+  };
+  const previous = sumField("previous");
+  const current = sumField("current");
+  const movement = sumField("movement");
+  const percent = Number.isFinite(previous) && previous !== 0 && Number.isFinite(movement)
+    ? movement / previous
+    : null;
+  return {previous,current,movement,percent};
 }
 
 function fmtPct(n){
@@ -893,11 +919,12 @@ function renderDetail(){
 
   renderTabs();
 
+  const total = aggregateActivityRows(a);
   $("detailSummary").innerHTML=`
-    <div class="kpi"><span>${cfg.currentLabel}</span><strong>${fmtAmount(a.current)}</strong></div>
-    <div class="kpi"><span>${cfg.previousLabel}</span><strong>${fmtAmount(a.previous)}</strong></div>
-    <div class="kpi"><span>${cfg.movementLabel}</span><strong class="${signClass(a.movement)}">${a.movement>0?"+":""}${fmtAmount(a.movement)}</strong></div>
-    <div class="kpi"><span>${cfg.percentLabel}</span><strong class="${signClass(a.percent)}">${fmtPct(a.percent)}</strong></div>`;
+    <div class="kpi"><span>${cfg.currentLabel}</span><strong>${fmtFullAmount(total.current)}</strong></div>
+    <div class="kpi"><span>${cfg.previousLabel}</span><strong>${fmtFullAmount(total.previous)}</strong></div>
+    <div class="kpi"><span>${cfg.movementLabel}</span><strong class="${signClass(total.movement)}">${total.movement>0?"+":""}${fmtFullAmount(total.movement)}</strong></div>
+    <div class="kpi"><span>${cfg.percentLabel}</span><strong class="${signClass(total.percent)}">${fmtPct(total.percent)}</strong></div>`;
 
   $("detailThead").innerHTML=`<tr>
     <th>Account</th><th>Description</th><th>${cfg.previousLabel}</th><th>${cfg.currentLabel}</th>
@@ -918,22 +945,24 @@ function renderDetailRows(){
   const rowHtml=rows.map(r=>`<tr>
     <td class="acct">${esc(r.account)}${pareto.has(r.account)?'<span class="pareto-badge">PARETO</span>':""}</td>
     <td class="desccell" title="${esc(r.description)}">${esc(r.description)}</td>
-    <td>${fmtAmount(r.previous)}</td>
-    <td>${fmtAmount(r.current)}</td>
-    <td class="${signClass(r.movement)}">${r.movement>0?"+":""}${fmtAmount(r.movement)}</td>
+    <td>${fmtFullAmount(r.previous)}</td>
+    <td>${fmtFullAmount(r.current)}</td>
+    <td class="${signClass(r.movement)}">${r.movement>0?"+":""}${fmtFullAmount(r.movement)}</td>
     <td class="${signClass(r.percent)}">${fmtPct(r.percent)}</td>
   </tr>`).join("");
 
-  // Total always refers to ALL detail rows, not only the current search result.
-  const totalPrevious=a.previous;
-  const totalCurrent=a.current;
-  const totalMovement=a.movement;
-  const totalPercent=a.percent;
+  // TOTAL always refers to ALL Detail Account-Description rows,
+  // not only the current search result and not the classification header.
+  const totals=aggregateActivityRows(a);
+  const totalPrevious=totals.previous;
+  const totalCurrent=totals.current;
+  const totalMovement=totals.movement;
+  const totalPercent=totals.percent;
   const totalHtml=`<tr class="total-row">
     <td></td><td>TOTAL</td>
-    <td>${fmtAmount(totalPrevious)}</td>
-    <td>${fmtAmount(totalCurrent)}</td>
-    <td class="${signClass(totalMovement)}">${totalMovement>0?"+":""}${fmtAmount(totalMovement)}</td>
+    <td>${fmtFullAmount(totalPrevious)}</td>
+    <td>${fmtFullAmount(totalCurrent)}</td>
+    <td class="${signClass(totalMovement)}">${totalMovement>0?"+":""}${fmtFullAmount(totalMovement)}</td>
     <td class="${signClass(totalPercent)}">${fmtPct(totalPercent)}</td>
   </tr>`;
   $("detailTbody").innerHTML=rowHtml+totalHtml;
