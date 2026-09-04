@@ -254,8 +254,8 @@ tbody tr:hover{background:#fafcfd}.total-row td{font-weight:900;background:#edf4
    CONFIGURATION — SOURCE OF TRUTH: SHEET "REKAP" ONLY
    ========================================================= */
 const CLASSIFICATIONS = [
-  "BEBAN BUNGA PINJAMAN",
-  "PENDAPATAN KLAIM",
+  "BEBAN BUNGA",
+  "PENDAPATAN LAIN-LAIN",
   "PENDAPATAN BUNGA",
   "LABA (RUGI) SELISIH KURS"
 ];
@@ -304,7 +304,7 @@ const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_XML_BYTES = 120 * 1024 * 1024;
 const CACHE_DB = "fluctuation-dashboard";
 const CACHE_STORE = "state";
-const CACHE_KEY = "lastParsedDashboardV6";
+const CACHE_KEY = "lastParsedDashboardV8";
 
 let state = null;
 let activeClass = CLASSIFICATIONS[0];
