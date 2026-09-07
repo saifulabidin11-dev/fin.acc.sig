@@ -170,6 +170,20 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
 .reason-raw{font-size:10px;line-height:1.62;color:#2f4b62;white-space:pre-wrap;word-break:break-word;background:#e4eef5;border:1px solid #c7d7e3;border-radius:12px;padding:11px 13px;box-shadow:0 2px 8px rgba(34,55,75,.035)}
 .no-reason{padding:18px;color:#94a1ad;font-size:9px}
 
+
+/* ===== Supabase Shared State ===== */
+.sync-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.sync-badge{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 9px;border-radius:999px;font-size:8px;font-weight:850;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.09);color:#dce8f1}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#97a9b8}
+.sync-badge.connected .sync-dot{background:#49c69a}.sync-badge.local .sync-dot{background:#d9a441}
+.auth-overlay{position:fixed;inset:0;background:rgba(13,31,48,.58);display:flex;align-items:center;justify-content:center;padding:18px;z-index:9999;backdrop-filter:blur(5px)}
+.auth-card{width:min(390px,100%);background:#f7fafc;border:1px solid #d5e0e9;border-radius:20px;padding:20px;box-shadow:0 24px 60px rgba(8,28,45,.28)}
+.auth-title{font-size:16px;font-weight:900;color:#173d5a;margin-bottom:4px}.auth-sub{font-size:9px;color:#718596;line-height:1.45;margin-bottom:14px}
+.auth-field{display:flex;flex-direction:column;gap:5px;margin-bottom:10px}.auth-field label{font-size:8px;text-transform:uppercase;font-weight:850;color:#60778a}
+.auth-field input{height:38px;border:1px solid #c7d5df;border-radius:10px;padding:0 11px;outline:none;background:#fff;color:#20384b;font-size:10px}.auth-field input:focus{border-color:#6d95b4;box-shadow:0 0 0 3px rgba(55,113,157,.08)}
+.auth-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:13px}.auth-primary,.auth-secondary{border-radius:10px;padding:9px 12px;font-size:9px;font-weight:900;cursor:pointer}
+.auth-primary{border:1px solid #173d5a;background:#214f72;color:#fff}.auth-secondary{border:1px solid #cdd9e2;background:#fff;color:#49677f}.auth-message{font-size:9px;line-height:1.4;margin-top:9px;color:#b43e49}
+
 /* ===== Dashboard Sidebar ===== */
 .dashboard-layout{
   display:grid;
@@ -316,9 +330,15 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
       <div class="uploadrow">
         <label class="filelabel" for="fileInput">Pilih Excel</label>
         <input id="fileInput" type="file" accept=".xlsx,.xlsm">
-        <button class="ghostbtn" id="clearBtn" type="button">Hapus Data Lokal</button>
+        <button class="ghostbtn" id="refreshSharedBtn" type="button">Refresh Data</button>
+        <button class="ghostbtn" id="loginBtn" type="button">Login Update</button>
+        <button class="ghostbtn" id="logoutBtn" type="button" style="display:none">Logout</button>
+        <button class="ghostbtn" id="clearBtn" type="button">Hapus Cache Lokal</button>
       </div>
-      <div class="filesmall" id="fileSmall">File diproses seluruhnya di browser. Sheet selain Rekap tidak dibaca untuk analisis.</div>
+      <div class="sync-row">
+        <div id="syncBadge" class="sync-badge local"><span class="sync-dot"></span><span id="syncText">Mode lokal</span></div>
+      </div>
+      <div class="filesmall" id="fileSmall">Excel diproses di browser. Hasil dashboard disimpan ke Supabase jika konfigurasi aktif.</div>
     </div>
   </div>
 </header>
@@ -393,6 +413,17 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
   </section>
 </main>
 
+<div id="authOverlay" class="auth-overlay hidden">
+  <div class="auth-card">
+    <div class="auth-title">Login untuk Update Dashboard</div>
+    <div class="auth-sub">Viewer tetap dapat membuka dashboard. Login hanya diperlukan untuk upload/update data bersama di Supabase.</div>
+    <div class="auth-field"><label>Email</label><input id="authEmail" type="email" autocomplete="username" placeholder="email@domain.com"></div>
+    <div class="auth-field"><label>Password</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="Password"></div>
+    <div id="authMessage" class="auth-message"></div>
+    <div class="auth-actions"><button id="authCancelBtn" class="auth-secondary" type="button">Batal</button><button id="authSubmitBtn" class="auth-primary" type="button">Login</button></div>
+  </div>
+</div>
+
 <script>
 "use strict";
 
@@ -446,11 +477,20 @@ const ACTIVITY = {
 };
 
 const PARETO_THRESHOLD = 0.80;
+const SUPABASE_CONFIG = {
+  url: "https://dvogapaqekcckoxiddsr.supabase.co",
+  publishableKey: "sb_publishable_zQsI8G5dv2qrB-XDjB74hg_mKOVn5iz"
+};
+
+const SUPABASE_STATE_TABLE = "dashboard_state";
+const SUPABASE_HISTORY_TABLE = "dashboard_history";
+const SUPABASE_SESSION_KEY = "fa_dashboard_supabase_session_v1";
+
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_XML_BYTES = 120 * 1024 * 1024;
 const CACHE_DB = "fluctuation-dashboard";
 const CACHE_STORE = "state";
-const CACHE_KEY = "lastParsedDashboardV20";
+const CACHE_KEY = "lastParsedDashboardV21";
 
 let state = null;
 let activeClass = CLASSIFICATIONS[0];
@@ -911,6 +951,70 @@ async function parseRekapWorkbook(file){
 }
 
 /* =========================================================
+   SUPABASE SHARED STATE
+   ========================================================= */
+function supabaseConfigured(){
+  return /^https:\/\/.+\.supabase\.co$/i.test(SUPABASE_CONFIG.url || "")
+    && SUPABASE_CONFIG.publishableKey
+    && !SUPABASE_CONFIG.publishableKey.includes("YOUR_SUPABASE");
+}
+function supabaseBase(path){ return `${SUPABASE_CONFIG.url.replace(/\/$/,"")}${path}`; }
+function loadSupabaseSession(){ try{ const raw=localStorage.getItem(SUPABASE_SESSION_KEY); return raw?JSON.parse(raw):null; }catch(e){ return null; } }
+function saveSupabaseSession(session){ if(session) localStorage.setItem(SUPABASE_SESSION_KEY,JSON.stringify(session)); else localStorage.removeItem(SUPABASE_SESSION_KEY); updateAuthUi(); }
+function sessionExpired(session){ if(!session?.expires_at) return true; return Date.now() >= (Number(session.expires_at)*1000-30000); }
+async function refreshSupabaseSessionIfNeeded(){
+  let session=loadSupabaseSession(); if(!session) return null; if(!sessionExpired(session)) return session;
+  if(!session.refresh_token){ saveSupabaseSession(null); return null; }
+  try{
+    const res=await fetch(supabaseBase("/auth/v1/token?grant_type=refresh_token"),{method:"POST",headers:{"apikey":SUPABASE_CONFIG.publishableKey,"Content-Type":"application/json"},body:JSON.stringify({refresh_token:session.refresh_token})});
+    if(!res.ok) throw new Error("Session expired");
+    const data=await res.json();
+    const refreshed={access_token:data.access_token,refresh_token:data.refresh_token||session.refresh_token,expires_at:Math.floor(Date.now()/1000)+(data.expires_in||3600),user:data.user||session.user||null};
+    saveSupabaseSession(refreshed); return refreshed;
+  }catch(e){ saveSupabaseSession(null); return null; }
+}
+async function loginSupabase(email,password){
+  if(!supabaseConfigured()) throw new Error("Konfigurasi Supabase belum diisi pada index.html.");
+  const res=await fetch(supabaseBase("/auth/v1/token?grant_type=password"),{method:"POST",headers:{"apikey":SUPABASE_CONFIG.publishableKey,"Content-Type":"application/json"},body:JSON.stringify({email,password})});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data?.msg||data?.error_description||data?.message||"Login gagal.");
+  const session={access_token:data.access_token,refresh_token:data.refresh_token,expires_at:Math.floor(Date.now()/1000)+(data.expires_in||3600),user:data.user||null};
+  saveSupabaseSession(session); return session;
+}
+function supabaseHeaders({authenticated=false,prefer=null}={}){
+  const session=loadSupabaseSession(); const token=authenticated?session?.access_token:(session?.access_token||SUPABASE_CONFIG.publishableKey);
+  const headers={"apikey":SUPABASE_CONFIG.publishableKey,"Authorization":`Bearer ${token}`,"Content-Type":"application/json"}; if(prefer) headers["Prefer"]=prefer; return headers;
+}
+async function loadSharedDashboard(){
+  if(!supabaseConfigured()) return null;
+  const res=await fetch(supabaseBase(`/rest/v1/${SUPABASE_STATE_TABLE}?id=eq.current&select=id,file_name,sheet_name,updated_at,data_json`),{headers:supabaseHeaders()});
+  if(!res.ok){ const text=await res.text(); throw new Error(`Gagal membaca data Supabase (${res.status}): ${text.slice(0,180)}`); }
+  const rows=await res.json(); return rows?.[0]||null;
+}
+async function saveSharedDashboard(parsed){
+  if(!supabaseConfigured()) throw new Error("Konfigurasi Supabase belum diisi pada index.html.");
+  const session=await refreshSupabaseSessionIfNeeded(); if(!session?.access_token) throw new Error("Silakan login untuk update dashboard.");
+  const payload={id:"current",file_name:parsed.fileName,sheet_name:parsed.sheetName||"Rekap",updated_at:new Date().toISOString(),data_json:parsed};
+  const upsert=await fetch(supabaseBase(`/rest/v1/${SUPABASE_STATE_TABLE}?on_conflict=id`),{method:"POST",headers:supabaseHeaders({authenticated:true,prefer:"resolution=merge-duplicates,return=minimal"}),body:JSON.stringify(payload)});
+  if(!upsert.ok){ const text=await upsert.text(); throw new Error(`Gagal menyimpan dashboard ke Supabase (${upsert.status}): ${text.slice(0,220)}`); }
+  try{ await fetch(supabaseBase(`/rest/v1/${SUPABASE_HISTORY_TABLE}`),{method:"POST",headers:supabaseHeaders({authenticated:true,prefer:"return=minimal"}),body:JSON.stringify({file_name:parsed.fileName,sheet_name:parsed.sheetName||"Rekap",data_json:parsed})}); }catch(e){ console.warn("History save skipped",e); }
+}
+function updateSyncUi(mode="local",detail=""){
+  const badge=$("syncBadge"), text=$("syncText"); if(!badge||!text) return; badge.classList.remove("connected","local"); badge.classList.add(mode==="shared"?"connected":"local"); text.textContent=detail||(mode==="shared"?"Supabase shared":"Mode lokal");
+}
+function updateAuthUi(){ const s=loadSupabaseSession(), loggedIn=!!s?.access_token; if($("loginBtn")) $("loginBtn").style.display=loggedIn?"none":""; if($("logoutBtn")) $("logoutBtn").style.display=loggedIn?"":"none"; }
+function openAuthModal(){ $("authMessage").textContent=""; $("authPassword").value=""; $("authOverlay").classList.remove("hidden"); setTimeout(()=>$("authEmail").focus(),50); }
+function closeAuthModal(){ $("authOverlay").classList.add("hidden"); }
+async function refreshSharedState({quiet=false}={}){
+  if(!supabaseConfigured()){ updateSyncUi("local","Supabase belum dikonfigurasi"); if(!quiet) setStatus("Supabase belum dikonfigurasi. Aplikasi menggunakan cache lokal.","info"); return false; }
+  try{
+    const shared=await loadSharedDashboard();
+    if(shared?.data_json){ state=shared.data_json; await saveCache(state); activeClass=CLASSIFICATIONS[0]; activeActivity="mom"; renderDashboard(); const when=shared.updated_at?new Date(shared.updated_at).toLocaleString("id-ID"):""; updateSyncUi("shared",when?`Shared · ${when}`:"Supabase shared"); if(!quiet) setStatus(`Data shared dimuat dari Supabase: ${shared.file_name||state.fileName}`,"success"); return true; }
+    updateSyncUi("shared","Supabase siap · belum ada data"); if(!quiet) setStatus("Supabase siap, tetapi dashboard current belum tersedia.","info"); return false;
+  }catch(e){ console.warn(e); updateSyncUi("local","Supabase gagal · cache lokal"); if(!quiet) setStatus(`${e.message} Menggunakan cache lokal jika tersedia.`,`error`); return false; }
+}
+
+/* =========================================================
    INDEXEDDB — CACHE PARSED DATA LOCALLY, NOT THE EXCEL FILE
    ========================================================= */
 function openCache(){
@@ -1169,25 +1273,26 @@ function renderDetailRows(){
    EVENTS
    ========================================================= */
 $("fileInput").addEventListener("change",async event=>{
-  const file=event.target.files?.[0];
-  if(!file) return;
-  clearStatus();
-  setStatus(`Memproses ${file.name}...`,"info");
+  const file=event.target.files?.[0]; if(!file) return;
+  if(supabaseConfigured()){
+    const session=await refreshSupabaseSessionIfNeeded();
+    if(!session?.access_token){ event.target.value=""; openAuthModal(); setStatus("Login diperlukan sebelum upload/update data shared.","info"); return; }
+  }
+  clearStatus(); setStatus(`Memproses ${file.name}...`,"info");
   try{
     const parsed=await parseRekapWorkbook(file);
-    state=parsed;
-    activeClass=CLASSIFICATIONS[0];
-    activeActivity="mom";
-    await saveCache(state);
-    renderDashboard();
-    const warning=parsed.warnings?.length ? ` ${parsed.warnings.join(" ")}` : "";
-    setStatus(`Berhasil memuat sheet ${parsed.sheetName}. Empat klasifikasi siap dianalisis.${warning}`,"success");
-  }catch(err){
-    console.error(err);
-    setStatus(err?.message || "Gagal memproses file Excel.","error");
-  }finally{
-    event.target.value="";
-  }
+    if(supabaseConfigured()){ setStatus(`Menyimpan ${file.name} ke dashboard shared...`,"info"); await saveSharedDashboard(parsed); }
+    state=parsed; activeClass=CLASSIFICATIONS[0]; activeActivity="mom"; await saveCache(state); renderDashboard();
+    if(supabaseConfigured()){
+      updateSyncUi("shared","Data tersimpan di Supabase");
+      const warning=parsed.warnings?.length?` ${parsed.warnings.join(" ")}`:"";
+      setStatus(`Berhasil update dashboard shared dari sheet ${parsed.sheetName}.${warning}`,"success");
+    }else{
+      const warning=parsed.warnings?.length?` ${parsed.warnings.join(" ")}`:"";
+      setStatus(`Berhasil memuat sheet ${parsed.sheetName}. Data saat ini hanya tersimpan lokal.${warning}`,"success");
+    }
+  }catch(err){ console.error(err); setStatus(err?.message||"Gagal memproses file Excel.","error"); }
+  finally{ event.target.value=""; }
 });
 
 $("clearBtn").addEventListener("click",async()=>{
@@ -1195,8 +1300,8 @@ $("clearBtn").addEventListener("click",async()=>{
   state=null;
   activeClass=CLASSIFICATIONS[0];
   activeActivity="mom";
-  $("fileSmall").textContent="File diproses seluruhnya di browser. Sheet selain Rekap tidak dibaca untuk analisis.";
-  setStatus("Data dashboard lokal telah dihapus.","info");
+  $("fileSmall").textContent="Excel diproses di browser. Hasil dashboard disimpan ke Supabase jika konfigurasi aktif.";
+  setStatus("Cache lokal telah dihapus. Data shared Supabase tidak dihapus.","info");
   renderDashboard();
 });
 
@@ -1207,17 +1312,30 @@ $("backBtn").addEventListener("click",()=>{
 
 $("searchInput").addEventListener("input",renderDetailRows);
 
+$("refreshSharedBtn").addEventListener("click",async()=>{ await refreshSharedState({quiet:false}); });
+$("loginBtn").addEventListener("click",openAuthModal);
+$("logoutBtn").addEventListener("click",()=>{ saveSupabaseSession(null); setStatus("Logout update berhasil. Dashboard tetap dapat dibaca.","info"); });
+$("authCancelBtn").addEventListener("click",closeAuthModal);
+$("authOverlay").addEventListener("click",event=>{ if(event.target===$("authOverlay")) closeAuthModal(); });
+$("authSubmitBtn").addEventListener("click",async()=>{
+  const email=$("authEmail").value.trim(), password=$("authPassword").value; $("authMessage").textContent="";
+  if(!email||!password){ $("authMessage").textContent="Email dan password wajib diisi."; return; }
+  $("authSubmitBtn").disabled=true; $("authSubmitBtn").textContent="Login...";
+  try{ await loginSupabase(email,password); closeAuthModal(); setStatus("Login berhasil. Anda sekarang dapat upload/update dashboard shared.","success"); }
+  catch(e){ $("authMessage").textContent=e.message||"Login gagal."; }
+  finally{ $("authSubmitBtn").disabled=false; $("authSubmitBtn").textContent="Login"; }
+});
+window.addEventListener("focus",()=>{ if(supabaseConfigured()) refreshSharedState({quiet:true}); });
+
 (async function init(){
-  const cached=await loadCache();
-  if(cached?.classes?.length){
-    state=cached;
-    activeClass=CLASSIFICATIONS[0];
-    activeActivity="mom";
-    renderDashboard();
-    setStatus(`Data lokal terakhir dipulihkan: ${cached.fileName}`,"info");
-  }else{
-    renderDashboard();
+  updateAuthUi();
+  if(supabaseConfigured()){
+    const loadedShared=await refreshSharedState({quiet:true});
+    if(loadedShared) return;
   }
+  const cached=await loadCache();
+  if(cached?.classes?.length){ state=cached; activeClass=CLASSIFICATIONS[0]; activeActivity="mom"; renderDashboard(); updateSyncUi("local",supabaseConfigured()?"Cache lokal fallback":"Mode lokal"); setStatus(`Cache lokal dipulihkan: ${cached.fileName}`,"info"); }
+  else{ renderDashboard(); updateSyncUi("local",supabaseConfigured()?"Supabase siap · belum ada data":"Supabase belum dikonfigurasi"); }
 })();
 </script>
 </body>
