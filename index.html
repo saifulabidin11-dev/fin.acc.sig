@@ -338,7 +338,6 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
       <div class="sync-row">
         <div id="syncBadge" class="sync-badge local"><span class="sync-dot"></span><span id="syncText">Mode lokal</span></div>
       </div>
-      <div class="filesmall" id="fileSmall">Excel diproses di browser. Hasil dashboard disimpan ke Supabase jika konfigurasi aktif.</div>
     </div>
   </div>
 </header>
@@ -348,14 +347,11 @@ tbody tr:nth-child(even){background:#f8fafc}tbody tr:hover{background:#eef5fa}.t
 
   <section id="emptyPanel" class="empty-state">
     <h2>Belum ada data dashboard</h2>
-    <p>Pilih file Excel yang memiliki sheet <b>Rekap</b>. Dashboard hanya membaca sheet Rekap dan mengabaikan seluruh sheet lainnya. Data tidak dikirim ke server.</p>
+    <p>Pilih file Excel yang memiliki sheet <b>Rekap</b>. Dashboard hanya membaca sheet Rekap dan mengabaikan seluruh sheet lainnya.</p>
     <label class="empty-action" for="fileInput">Pilih File Excel</label>
   </section>
 
   <section id="dashboardPanel" class="hidden">
-    <div class="topline">
-      <div class="sourceinfo" id="sourceInfo">-</div>
-    </div>
 
     <div class="dashboard-layout">
       <aside class="dashboard-sidebar">
@@ -478,8 +474,8 @@ const ACTIVITY = {
 
 const PARETO_THRESHOLD = 0.80;
 const SUPABASE_CONFIG = {
-  url: "https://dvogapaqekcckoxiddsr.supabase.co",
-  publishableKey: "sb_publishable_zQsI8G5dv2qrB-XDjB74hg_mKOVn5iz"
+  url: "YOUR_SUPABASE_PROJECT_URL",
+  publishableKey: "YOUR_SUPABASE_PUBLISHABLE_KEY"
 };
 
 const SUPABASE_STATE_TABLE = "dashboard_state";
@@ -490,7 +486,7 @@ const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_XML_BYTES = 120 * 1024 * 1024;
 const CACHE_DB = "fluctuation-dashboard";
 const CACHE_STORE = "state";
-const CACHE_KEY = "lastParsedDashboardV21";
+const CACHE_KEY = "lastParsedDashboardV22";
 
 let state = null;
 let activeClass = CLASSIFICATIONS[0];
@@ -1125,8 +1121,6 @@ function renderDashboard(){
   $("emptyPanel").classList.add("hidden");
   $("detailPanel").classList.add("hidden");
   $("dashboardPanel").classList.remove("hidden");
-  $("sourceInfo").textContent=`${state.fileName} · sheet ${state.sheetName}`;
-  $("fileSmall").textContent=`Aktif: ${state.fileName} · diproses lokal di browser`;
 
   const selected = getClass(activeClass) || state.classes[0];
   activeClass = selected.name;
@@ -1300,7 +1294,6 @@ $("clearBtn").addEventListener("click",async()=>{
   state=null;
   activeClass=CLASSIFICATIONS[0];
   activeActivity="mom";
-  $("fileSmall").textContent="Excel diproses di browser. Hasil dashboard disimpan ke Supabase jika konfigurasi aktif.";
   setStatus("Cache lokal telah dihapus. Data shared Supabase tidak dihapus.","info");
   renderDashboard();
 });
